@@ -67,12 +67,6 @@ cd "${SCRIPT_DIR}/smanga-adonis"
 git pull origin main
 ADONIS_UPDATE_EXIT=$?
 
-# 更新smanga-express项目
-echo "更新 smanga-express 项目..."
-cd "${SCRIPT_DIR}/smanga-express"
-git pull origin main
-EXPRESS_UPDATE_EXIT=$?
-
 # 返回脚本目录
 cd "${SCRIPT_DIR}"
 
@@ -85,11 +79,6 @@ fi
 
 if [ $ADONIS_UPDATE_EXIT -ne 0 ]; then
     echo "❌ smanga-adonis 项目更新失败"
-    exit 1
-fi
-
-if [ $EXPRESS_UPDATE_EXIT -ne 0 ]; then
-    echo "❌ smanga-express 项目更新失败"
     exit 1
 fi
 
