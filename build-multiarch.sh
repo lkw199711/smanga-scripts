@@ -99,17 +99,19 @@ echo "📦 当前版本号: ${VERSION}"
 echo "🐳 目标镜像:   ${IMAGE_NAME}:${VERSION}"
 echo ""
 
-# 步骤2: 确保 buildx builder 可用
+# 步骤2: 确保 buildx builder 可用（使用 docker 内置驱动，无需额外拉取镜像）
 echo "[2/7] 检查 buildx builder..."
 echo "----------------------------------------"
 time_start
 
+# 检查是否已存在 multiarch builder，若不存在则基于默认 docker 驱动创建
+# docker 驱动复用 Docker 自带的 BuildKit，不需要像 docker-container 那样额外拉取 moby/buildkit 镜像
 if docker buildx inspect "${BUILDER_NAME}" > /dev/null 2>&1; then
     echo "✅ builder '${BUILDER_NAME}' 已存在"
     docker buildx use "${BUILDER_NAME}"
 else
-    echo "⚠️  builder '${BUILDER_NAME}' 不存在，正在创建..."
-    docker buildx create --name "${BUILDER_NAME}" --driver docker-container --use
+    echo "⚠️  builder '${BUILDER_NAME}' 不存在，基于默认 docker 驱动创建..."
+    docker buildx create --name "${BUILDER_NAME}" --driver docker --use
     if [ $? -ne 0 ]; then
         echo "❌ builder 创建失败"
         exit 1
@@ -117,8 +119,6 @@ else
     echo "✅ builder '${BUILDER_NAME}' 创建成功"
 fi
 
-echo "启动 builder..."
-docker buildx inspect --bootstrap
 echo ""
 echo "已支持的平台:"
 docker buildx inspect --builder "${BUILDER_NAME}" | grep -i platforms || echo "  (无法获取平台列表)"
