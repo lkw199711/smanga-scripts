@@ -22,6 +22,7 @@ PUSH_TO_DOCKERHUB=false
 PUSH_TO_ALIYUN=true
 
 # 多架构配置
+BUILDER_NAME="multiarch"
 PLATFORMS="linux/amd64,linux/arm64"
 
 # 获取脚本目录 (版本号将在 git pull 之后读取，确保拿到最新版本)
@@ -98,17 +99,41 @@ echo "📦 当前版本号: ${VERSION}"
 echo "🐳 目标镜像:   ${IMAGE_NAME}:${VERSION}"
 echo ""
 
-# 步骤2: 检查 buildx（使用 Docker 内置驱动，无需额外拉取镜像）
-echo "[2/7] 检查 buildx..."
+# 步骤2: 检查 buildx builder（多架构需要 docker-container 驱动）
+echo "[2/7] 检查 buildx builder..."
 echo "----------------------------------------"
 time_start
 
-# 直接复用默认 builder，docker 驱动只允许一个实例，已内置在 Docker 中
-docker buildx use default 2>/dev/null || true
-echo "✅ 使用默认 builder (docker 驱动)"
+# docker 驱动不支持多架构，必须用 docker-container
+# docker-container 会启动独立的 BuildKit 容器，需要拉取 moby/buildkit 镜像（约 180MB）
+if docker buildx inspect "${BUILDER_NAME}" > /dev/null 2>&1; then
+    EXISTING_DRIVER=$(docker buildx inspect "${BUILDER_NAME}" 2>/dev/null | grep -o 'Driver:\s*\S*' | awk '{print $2}')
+    if [ "${EXISTING_DRIVER}" != "docker-container" ]; then
+        echo "⚠️  现有 builder 驱动为 '${EXISTING_DRIVER}'（不支持多架构），删除重建..."
+        docker buildx rm "${BUILDER_NAME}"
+    else
+        echo "✅ builder '${BUILDER_NAME}' 已存在 (驱动: docker-container)"
+        docker buildx use "${BUILDER_NAME}"
+    fi
+fi
+
+# 如果不存在（或被上面删了），重新创建
+if ! docker buildx inspect "${BUILDER_NAME}" > /dev/null 2>&1; then
+    echo "创建 builder '${BUILDER_NAME}' (docker-container 驱动)..."
+    docker buildx create --name "${BUILDER_NAME}" --driver docker-container --use
+    if [ $? -ne 0 ]; then
+        echo "❌ builder 创建失败"
+        exit 1
+    fi
+    echo "✅ builder '${BUILDER_NAME}' 创建成功"
+fi
+
+echo ""
+echo "启动 builder（首次需从 Docker Hub 拉取 buildkit 镜像约 180MB，请耐心等待）..."
+docker buildx inspect --bootstrap
 echo ""
 echo "已支持的平台:"
-docker buildx inspect | grep -i platforms || echo "  (无法获取平台列表)"
+docker buildx inspect --builder "${BUILDER_NAME}" | grep -i platforms || echo "  (无法获取平台列表)"
 
 time_end
 echo ""
@@ -220,6 +245,7 @@ time_start
 # docker buildx build 一次构建、同时推送到多个仓库
 # 注意: --push 模式下不在本地保留镜像，直接推送到远程仓库
 docker buildx build \
+    --builder "${BUILDER_NAME}" \
     --platform "${PLATFORMS}" \
     ${TAG_ARGS} \
     --push \
@@ -240,10 +266,10 @@ echo "----------------------------------------"
 time_start
 
 echo "当前 buildx 磁盘使用:"
-docker buildx du
+docker buildx du --builder "${BUILDER_NAME}"
 
 # 清理超过 72 小时的构建缓存
-docker buildx prune --filter "until=72h" --force
+docker buildx prune --builder "${BUILDER_NAME}" --filter "until=72h" --force
 echo "✅ buildx 缓存清理完成"
 
 time_end
