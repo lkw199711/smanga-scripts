@@ -25,7 +25,7 @@ FROM node:20.18.0-alpine3.20 AS frontend-builder
 
 WORKDIR /smanga
 COPY smanga/package.json smanga/package-lock.json ./
-# RUN npm ci
+RUN npm ci
 
 COPY smanga/ ./
 RUN npm run build-docker
