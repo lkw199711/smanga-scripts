@@ -1,4 +1,4 @@
-FROM node:20.18.0-alpine3.20 AS base
+FROM node:22-alpine3.22 AS base
 
 FROM base AS prepare
 
@@ -21,7 +21,7 @@ WORKDIR /smanga-adonis
 RUN npm run build
 
 # 构建前端 smanga
-FROM node:20.18.0-alpine3.20 AS frontend-builder
+FROM node:22-alpine3.22 AS frontend-builder
 
 WORKDIR /smanga
 COPY smanga/package.json smanga/package-lock.json ./
