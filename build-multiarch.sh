@@ -22,7 +22,6 @@ PUSH_TO_DOCKERHUB=false
 PUSH_TO_ALIYUN=true
 
 # 多架构配置
-BUILDER_NAME="multiarch"
 PLATFORMS="linux/amd64,linux/arm64"
 
 # 获取脚本目录 (版本号将在 git pull 之后读取，确保拿到最新版本)
@@ -99,29 +98,17 @@ echo "📦 当前版本号: ${VERSION}"
 echo "🐳 目标镜像:   ${IMAGE_NAME}:${VERSION}"
 echo ""
 
-# 步骤2: 确保 buildx builder 可用（使用 docker 内置驱动，无需额外拉取镜像）
-echo "[2/7] 检查 buildx builder..."
+# 步骤2: 检查 buildx（使用 Docker 内置驱动，无需额外拉取镜像）
+echo "[2/7] 检查 buildx..."
 echo "----------------------------------------"
 time_start
 
-# 检查是否已存在 multiarch builder，若不存在则基于默认 docker 驱动创建
-# docker 驱动复用 Docker 自带的 BuildKit，不需要像 docker-container 那样额外拉取 moby/buildkit 镜像
-if docker buildx inspect "${BUILDER_NAME}" > /dev/null 2>&1; then
-    echo "✅ builder '${BUILDER_NAME}' 已存在"
-    docker buildx use "${BUILDER_NAME}"
-else
-    echo "⚠️  builder '${BUILDER_NAME}' 不存在，基于默认 docker 驱动创建..."
-    docker buildx create --name "${BUILDER_NAME}" --driver docker --use
-    if [ $? -ne 0 ]; then
-        echo "❌ builder 创建失败"
-        exit 1
-    fi
-    echo "✅ builder '${BUILDER_NAME}' 创建成功"
-fi
-
+# 直接复用默认 builder，docker 驱动只允许一个实例，已内置在 Docker 中
+docker buildx use default 2>/dev/null || true
+echo "✅ 使用默认 builder (docker 驱动)"
 echo ""
 echo "已支持的平台:"
-docker buildx inspect --builder "${BUILDER_NAME}" | grep -i platforms || echo "  (无法获取平台列表)"
+docker buildx inspect | grep -i platforms || echo "  (无法获取平台列表)"
 
 time_end
 echo ""
@@ -233,7 +220,6 @@ time_start
 # docker buildx build 一次构建、同时推送到多个仓库
 # 注意: --push 模式下不在本地保留镜像，直接推送到远程仓库
 docker buildx build \
-    --builder "${BUILDER_NAME}" \
     --platform "${PLATFORMS}" \
     ${TAG_ARGS} \
     --push \
@@ -254,10 +240,10 @@ echo "----------------------------------------"
 time_start
 
 echo "当前 buildx 磁盘使用:"
-docker buildx du --builder "${BUILDER_NAME}"
+docker buildx du
 
 # 清理超过 72 小时的构建缓存
-docker buildx prune --builder "${BUILDER_NAME}" --filter "until=72h" --force
+docker buildx prune --filter "until=72h" --force
 echo "✅ buildx 缓存清理完成"
 
 time_end
