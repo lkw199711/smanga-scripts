@@ -17,8 +17,8 @@ ALIYUN_PASSWORD='123qweQA!'
 ALIYUN_IMAGE_NAME="${ALIYUN_REGISTRY}/${ALIYUN_NAMESPACE}/smanga-nodejs"
 
 # 推送开关 (true=推送, false=跳过)
-PUSH_TO_DOCKERHUB=true
-PUSH_TO_ALIYUN=false
+PUSH_TO_DOCKERHUB=false
+PUSH_TO_ALIYUN=true
 
 # 获取脚本目录 (版本号将在 git pull 之后读取，确保拿到最新版本)
 # SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
