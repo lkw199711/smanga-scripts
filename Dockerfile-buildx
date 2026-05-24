@@ -4,27 +4,32 @@ FROM base AS prepare
 
 # 复制本地项目文件，无需git clone
 COPY smanga-adonis /smanga-adonis
+COPY smanga-express /smanga-express
 
 # 清理不需要的文件
 RUN rm -rf \
-        /smanga-adonis/.git
+        /smanga-adonis/.git \
+        /smanga-express/.git \
+        /smanga-express/.env
+RUN mv /smanga-express/.env.docker /smanga-express/.env
 
 FROM prepare AS builder
 
 # 构建 smanga-adonis
 WORKDIR /smanga-adonis
-# RUN npm install
+# 删除宿主机拷入的 amd64 node_modules，重新安装以获取 ARM 原生绑定（@swc/core 等）
+RUN rm -rf node_modules && npm install
 RUN npm run build
 
 # 构建前端 smanga
 FROM node:22-alpine3.22 AS frontend-builder
 
 WORKDIR /smanga
-COPY smanga/package.json smanga/package-lock.json ./
-RUN npm ci
-
+# 拷贝全部源码，删除宿主机 amd64 node_modules，为当前架构重装依赖
 COPY smanga/ ./
-RUN npm run build-docker
+RUN rm -rf node_modules && npm ci && npm install
+# --max-old-space-size 限制 Node 内存，避免双架构并行构建 OOM
+RUN NODE_OPTIONS="--max-old-space-size=1024" npm run build-docker
 
 FROM base
 
@@ -42,6 +47,7 @@ COPY --from=builder /smanga-adonis/build /app/adonis
 COPY --from=builder /smanga-adonis/prisma /app/adonis/prisma
 COPY --from=builder /smanga-adonis/data-example/config/smanga.json /app/adonis/smanga.json
 COPY --from=builder /smanga-adonis/data-example/file /app/adonis/file
+COPY --from=prepare /smanga-express /app/express
 COPY --from=frontend-builder /smanga/dist/docker /app/smanga-website
 
 RUN apk add --no-cache \
@@ -54,6 +60,8 @@ RUN apk add --no-cache \
     cd /app/adonis && \
     npm ci && \
     mkdir cache && \
+    cd /app/express && \
+    npm ci && \
     addgroup -S smanga -g 918 && \
     adduser -S smanga -G smanga -h /app -u 918 -s /bin/bash
 
