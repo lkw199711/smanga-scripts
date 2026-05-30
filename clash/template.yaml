@@ -1,0 +1,238 @@
+# ==========================================================
+# 套路云节点 + 模板分组规则
+# 生成说明：节点来自 套路云.yaml，分组/规则来自 260422mihomo配置-模板.yaml
+# ==========================================================
+mixed-port: 7890
+allow-lan: true
+bind-address: '*'
+mode: rule
+log-level: info
+external-controller: '127.0.0.1:9090'
+unified-delay: true
+tcp-concurrent: true
+global-client-fingerprint: chrome
+
+dns:
+  enable: true
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  listen: 0.0.0.0:7874
+  use-hosts: true
+  respect-rules: true
+
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+    - 114.114.114.114
+
+  nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+
+  proxy-server-nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+
+  fallback:
+    - https://dns.google/dns-query#🚀 默认代理
+    - https://1.1.1.1/dns-query#🚀 默认代理
+    - https://8.8.8.8/dns-query#🚀 默认代理
+
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+
+sniffer:
+  enable: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+  force-domain:
+    - "+.v2ex.com"
+  skip-domain:
+    - "rule-set:private_domain,cn_domain"
+    - "dlg.io.mi.com"
+    - "+.push.apple.com"
+    - "+.apple.com"
+    - "+.wechat.com"
+    - "+.qpic.cn"
+    - "+.qq.com"
+    - "+.wechatapp.com"
+    - "+.vivox.com"
+    - "+.oray.com"
+    - "+.sunlogin.net"
+    - "+.msftconnecttest.com"
+    - "+.msftncsi.com"
+
+proxies:
+  - {name: '🟢 直连', type: direct, udp: true}
+  - { name: 官网：套路云.com, server: vn01.xn--9kq85xcu6b.com, port: 65534, udp: true, skip-cert-verify: true, sni: mirror.sg.gs, type: hysteria2, password: 1e8bf299-8f49-4e3c-b7d7-edee6d3eb2ef }
+  - { name: '剩余流量：95.67 GB', server: vn01.xn--9kq85xcu6b.com, port: 65534, udp: true, skip-cert-verify: true, sni: mirror.sg.gs, type: hysteria2, password: 1e8bf299-8f49-4e3c-b7d7-edee6d3eb2ef }
+  - { name: '距离下次重置剩余：21 天', server: vn01.xn--9kq85xcu6b.com, port: 65534, udp: true, skip-cert-verify: true, sni: mirror.sg.gs, type: hysteria2, password: 1e8bf299-8f49-4e3c-b7d7-edee6d3eb2ef }
+  - { name: 套餐到期：2027-03-31, server: vn01.xn--9kq85xcu6b.com, port: 65534, udp: true, skip-cert-verify: true, sni: mirror.sg.gs, type: hysteria2, password: 1e8bf299-8f49-4e3c-b7d7-edee6d3eb2ef }
+  - { name: '🇻🇳 越南01|电信移动|2X', server: vn01.xn--9kq85xcu6b.com, port: 65534, udp: true, skip-cert-verify: true, sni: mirror.sg.gs, type: hysteria2, password: 1e8bf299-8f49-4e3c-b7d7-edee6d3eb2ef }
+  - { name: '🇺🇸 美国01|1X', type: anytls, server: us01.xn--9kq85xcu6b.com, port: 32333, password: 1e8bf299-8f49-4e3c-b7d7-edee6d3eb2ef, client-fingerprint: chrome, udp: true, alpn: [h2, http/1.1], sni: www.yahoo.com, skip-cert-verify: true }
+  - { name: '🇺🇸 美国02|1X', type: anytls, server: us02.xn--9kq85xcu6b.com, port: 32333, password: 1e8bf299-8f49-4e3c-b7d7-edee6d3eb2ef, client-fingerprint: chrome, udp: true, alpn: [h2, http/1.1], sni: www.yahoo.com, skip-cert-verify: true }
+  - { name: '🇺🇸 美国03|1X', type: anytls, server: us03.xn--9kq85xcu6b.com, port: 32333, password: 1e8bf299-8f49-4e3c-b7d7-edee6d3eb2ef, client-fingerprint: chrome, udp: true, alpn: [h2, http/1.1], sni: www.yahoo.com, skip-cert-verify: true }
+  - { name: '🇭🇰 香港01|2X', type: anytls, server: hk01.xn--9kq85xcu6b.com, port: 32333, password: 1e8bf299-8f49-4e3c-b7d7-edee6d3eb2ef, client-fingerprint: chrome, udp: true, alpn: [h2, http/1.1], sni: mirrors.xtom.hk, skip-cert-verify: true }
+  - { name: '🇭🇰 香港A1|三网|2X', server: hk02.xn--9kq85xcu6b.com, port: 65534, udp: true, skip-cert-verify: true, sni: mirrors.xtom.hk, type: hysteria2, password: 1e8bf299-8f49-4e3c-b7d7-edee6d3eb2ef }
+  - { name: '🇯🇵 日本01|2X', type: anytls, server: jp01.xn--9kq85xcu6b.com, port: 32333, password: 1e8bf299-8f49-4e3c-b7d7-edee6d3eb2ef, client-fingerprint: chrome, udp: true, alpn: [h2, http/1.1], sni: www.yahoo.co.jp, skip-cert-verify: true }
+  - { name: '🇨🇦 加拿大01|1X', type: anytls, server: ca01.xn--9kq85xcu6b.com, port: 32333, password: 1e8bf299-8f49-4e3c-b7d7-edee6d3eb2ef, client-fingerprint: chrome, udp: true, alpn: [h2, http/1.1], sni: debian.linux.n0c.ca, skip-cert-verify: true }
+  - { name: '🇩🇪 德国01|1X', type: anytls, server: de01.xn--9kq85xcu6b.com, port: 32333, password: 1e8bf299-8f49-4e3c-b7d7-edee6d3eb2ef, client-fingerprint: chrome, udp: true, alpn: [h2, http/1.1], sni: mirror.dogado.de, skip-cert-verify: true }
+  - { name: '🇩🇪 德国02|1X', type: anytls, server: de02.xn--9kq85xcu6b.com, port: 32333, password: 1e8bf299-8f49-4e3c-b7d7-edee6d3eb2ef, client-fingerprint: chrome, udp: true, alpn: [h2, http/1.1], sni: mirror.dogado.de, skip-cert-verify: true }
+  - { name: '🇬🇧 英国01|1X', type: anytls, server: uk01.xn--9kq85xcu6b.com, port: 32333, password: 1e8bf299-8f49-4e3c-b7d7-edee6d3eb2ef, client-fingerprint: chrome, udp: true, alpn: [h2, http/1.1], sni: mirror.freethought-internet.co.uk, skip-cert-verify: true }
+  - { name: '🇫🇷 法国01|1X', type: anytls, server: fr01.xn--9kq85xcu6b.com, port: 32333, password: 1e8bf299-8f49-4e3c-b7d7-edee6d3eb2ef, client-fingerprint: chrome, udp: true, alpn: [h2, http/1.1], sni: ubuntu.mirrors.ovh.net, skip-cert-verify: true }
+  - { name: '🇳🇱 荷兰01|1X', type: anytls, server: nl01.xn--9kq85xcu6b.com, port: 32333, password: 1e8bf299-8f49-4e3c-b7d7-edee6d3eb2ef, client-fingerprint: chrome, udp: true, alpn: [h2, http/1.1], sni: mirror.serverion.com, skip-cert-verify: true }
+  - { name: '剩余流量：200 GB', type: anytls, server: ush1-c4uc3r8wykfpmdw4.node.cross666.top, port: 31333, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7, udp: true, sni: www.yahoo.com, skip-cert-verify: true }
+  - { name: '距离下次重置剩余：31 天', type: anytls, server: ush1-c4uc3r8wykfpmdw4.node.cross666.top, port: 31333, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7, udp: true, sni: www.yahoo.com, skip-cert-verify: true }
+  - { name: 套餐到期：2027-05-15, type: anytls, server: ush1-c4uc3r8wykfpmdw4.node.cross666.top, port: 31333, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7, udp: true, sni: www.yahoo.com, skip-cert-verify: true }
+  - { name: 官网：keluosi.top, type: anytls, server: ush1-c4uc3r8wykfpmdw4.node.cross666.top, port: 31333, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7, udp: true, sni: www.yahoo.com, skip-cert-verify: true }
+  - { name: '🇺🇸 美国H1|实验|1.1倍|V1', type: anytls, server: ush1-c4uc3r8wykfpmdw4.node.cross666.top, port: 31333, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7, udp: true, sni: www.yahoo.com, skip-cert-verify: true }
+  - { name: '🇺🇸 美国G3|实验|1倍|V1', type: anytls, server: usg3-ygyl0d0s.node.cross666.top, port: 31333, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7, udp: true, sni: www.yahoo.com, skip-cert-verify: true }
+  - { name: '🇺🇸 美国F2|电信联通|1.1倍|V1', server: usf2.node.cross666.top, port: 65535, sni: www.yahoo.com, up: 500, down: 500, skip-cert-verify: true, type: hysteria2, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7 }
+  - { name: '🇺🇸 美国C6|0.8倍|V1', type: anytls, server: usc6.node.cross666.top, port: 31333, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7, udp: true, sni: www.yahoo.com, skip-cert-verify: true }
+  - { name: '🇺🇸 美国E1|0.7倍|V1', type: anytls, server: use1.node.cross666.top, port: 31333, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7, udp: true, sni: www.yahoo.com, skip-cert-verify: true }
+  - { name: '🇭🇰 香港A2|电信联通|2倍|V1', server: hka2-1govz7w0l7w0lgt5.node.cross666.top, port: 65535, sni: mirrors.xtom.hk, up: 80, down: 80, skip-cert-verify: true, type: hysteria2, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7 }
+  - { name: '🇨🇦 加拿大A1|0.7倍|V1', type: anytls, server: caa1.node.cross666.top, port: 31333, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7, udp: true, sni: debian.linux.n0c.ca, skip-cert-verify: true }
+  - { name: '🇩🇪 德国A1|联通|0.7倍|V1', type: anytls, server: dea1.node.cross666.top, port: 31333, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7, udp: true, sni: mirror.dogado.de, skip-cert-verify: true }
+  - { name: '🇩🇪 德国B2|移动|1.1倍|V1', server: deb2-nhn7rvyt.node.cross666.top, port: 65535, sni: mirror.dogado.de, up: 500, down: 500, skip-cert-verify: true, type: hysteria2, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7 }
+  - { name: '🇬🇧 英国A2|联通移动|0.7倍|V1', type: anytls, server: uka2.node.cross666.top, port: 31333, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7, udp: true, sni: mirror.freethought-internet.co.uk, skip-cert-verify: true }
+  - { name: '🇫🇷 法国A2|联通|0.7倍|V1', type: anytls, server: fra2.node.cross666.top, port: 31333, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7, udp: true, sni: ubuntu.mirrors.ovh.net, skip-cert-verify: true }
+  - { name: '🇳🇱 荷兰A1|联通|0.8倍|V1', type: anytls, server: nla.node.cross666.top, port: 31333, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7, udp: true, sni: mirror.serverion.com, skip-cert-verify: true }
+  - { name: '🇳🇱 荷兰B1|联通|0.7倍|V1', type: anytls, server: nlb.node.cross666.top, port: 31333, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7, udp: true, sni: mirror.serverion.com, skip-cert-verify: true }
+  - { name: '🇷🇺 俄罗斯A1|联通|1倍|V1', type: anytls, server: rua1.node.cross666.top, port: 31333, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7, udp: true, sni: mirror.hyperdedic.ru, skip-cert-verify: true }
+  - { name: '🇩🇪 德国B16️⃣|移动|1.1倍|V1', server: deb1-v6.node.cross666.top, port: 65535, sni: mirror.dogado.de, up: 500, down: 500, skip-cert-verify: true, type: hysteria2, password: 84dbb2d2-1359-402d-abf4-bfead109a0a7 }
+  - { name: '剩余流量：1000 GB', type: anytls, server: isif2.kad520.uk, port: 51429, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: gw.alicdn.com, skip-cert-verify: true }
+  - { name: 套餐到期：长期有效, type: anytls, server: isif2.kad520.uk, port: 51429, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: gw.alicdn.com, skip-cert-verify: true }
+  - { name: 🇯🇵日本软银1, type: anytls, server: isif2.kad520.uk, port: 51429, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: gw.alicdn.com, skip-cert-verify: true }
+  - { name: 🇯🇵日本软银2, type: anytls, server: isif2.kad520.uk, port: 51420, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: gw.alicdn.com, skip-cert-verify: true }
+  - { name: '🇸🇬新加坡1 | 0.1×', type: anytls, server: x2.kad520.uk, port: 54679, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: gw.alicdn.com, skip-cert-verify: true }
+  - { name: '🇸🇬新加坡2 | 0.1×', type: anytls, server: x2.kad520.uk, port: 54128, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: gw.alicdn.com, skip-cert-verify: true }
+  - { name: '🇸🇬新加坡3 | 0.1×', type: anytls, server: x2.kad520.uk, port: 54653, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: gw.alicdn.com, skip-cert-verify: true }
+  - { name: '🇸🇬新加坡4 | 0.1×', type: anytls, server: x2.kad520.uk, port: 54834, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: gw.alicdn.com, skip-cert-verify: true }
+  - { name: 🇸🇬新加坡1|BGP, type: anytls, server: isif2.kad520.uk, port: 55783, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: www.aa.com, skip-cert-verify: true }
+  - { name: 🇸🇬新加坡2|BGP, type: anytls, server: isif2.kad520.uk, port: 57837, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: www.aa.com, skip-cert-verify: true }
+  - { name: 🇸🇬新加坡3|BGP, type: anytls, server: isif2.kad520.uk, port: 51680, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: gw.alicdn.com, skip-cert-verify: true }
+  - { name: 🇸🇬新加坡4|BGP, type: anytls, server: isif2.kad520.uk, port: 51781, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: gw.alicdn.com, skip-cert-verify: true }
+  - { name: 🇭🇰香港1a, type: anytls, server: hkb1.kad520.uk, port: 52132, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: gw.alicdn.com, skip-cert-verify: true }
+  - { name: 🇭🇰香港2a, type: anytls, server: hkb1.kad520.uk, port: 52141, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: gw.alicdn.com, skip-cert-verify: true }
+  - { name: 🇺🇸美国a1, type: anytls, server: bvmg1.kad520.uk, port: 51413, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: www.aa.com, skip-cert-verify: true }
+  - { name: 🇺🇸美国a2, type: anytls, server: bvmg1.kad520.uk, port: 51417, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: www.aa.com, skip-cert-verify: true }
+  - { name: 🇺🇸美国a3, type: anytls, server: bvmg1.kad520.uk, port: 51455, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: gw.alicdn.com, skip-cert-verify: true }
+  - { name: 🇺🇸美国a4, type: anytls, server: bvmg1.kad520.uk, port: 51531, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: gw.alicdn.com, skip-cert-verify: true }
+  - { name: 🇹🇼台湾1, type: anytls, server: tw1.kad520.uk, port: 52417, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: www.aa.com, skip-cert-verify: true }
+  - { name: 🇹🇼台湾2, type: anytls, server: tw1.kad520.uk, port: 52418, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: gw.alicdn.com, skip-cert-verify: true }
+  - { name: 🇹🇼台湾3, type: anytls, server: tw1.kad520.uk, port: 52419, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: gw.alicdn.com, skip-cert-verify: true }
+  - { name: 🇹🇼台湾4, type: anytls, server: tw1.kad520.uk, port: 52416, password: c4e3e9e6-2909-44a8-8974-cd54d21d5c4e, udp: true, sni: gw.alicdn.com, skip-cert-verify: true }
+  
+pr: &pr {type: select, proxies: ['🚀 默认代理', '🔯 香港故转', '🔯 日本故转', '🔯 美国故转', '🔯 新加坡故转', '🔯 台湾故转', '🔯 欧洲故转', '🔯 其他故转', '♻️ 香港自动', '♻️ 日本自动', '♻️ 美国自动', '♻️ 新加坡自动', '♻️ 台湾自动', '♻️ 欧洲自动', '♻️ 其他自动', '♻️ 自动选择', '🇭🇰 香港节点', '🇯🇵 日本节点', '🇺🇲 美国节点', '🇸🇬 新加坡节点', '🇹🇼 台湾节点', '🇪🇺 欧洲节点', '🌍 其他节点', '🌐 全部节点', '🟢 直连']}
+
+proxy-groups:
+  - {name: '🚀 默认代理', type: select, proxies: ['🔯 香港故转', '🔯 日本故转', '🔯 美国故转', '🔯 新加坡故转', '🔯 台湾故转', '🔯 欧洲故转', '🔯 其他故转', '♻️ 香港自动', '♻️ 日本自动', '♻️ 美国自动', '♻️ 新加坡自动', '♻️ 台湾自动', '♻️ 欧洲自动', '♻️ 其他自动', '♻️ 自动选择', '🇭🇰 香港节点', '🇯🇵 日本节点', '🇺🇲 美国节点', '🇸🇬 新加坡节点', '🇹🇼 台湾节点', '🇪🇺 欧洲节点', '🌍 其他节点', '🌐 全部节点', '🟢 直连']}
+
+  # --- 基础应用分流 ---
+  - {name: '📹 YouTube', <<: *pr}
+  - {name: '🍀 Google', <<: *pr}
+  - {name: '🤖 ChatGPT', <<: *pr}
+  - {name: '👨🏿‍💻 GitHub', <<: *pr}
+  - {name: '🐬 OneDrive', <<: *pr}
+  - {name: '🪟 Microsoft', <<: *pr}
+  - {name: '🎵 TikTok', <<: *pr}
+  - {name: '📲 Telegram', <<: *pr}
+  - {name: '🎥 NETFLIX', <<: *pr}
+  - {name: '✈️ Speedtest', <<: *pr}
+  - {name: '💶 PayPal', <<: *pr}
+  - {name: '🍎 Apple', type: select, proxies: ['🟢 直连', '🚀 默认代理']}
+  - {name: '🎯 直连', type: select, proxies: ['🟢 直连', '🚀 默认代理']}
+  - {name: '🐟 漏网之鱼', <<: *pr}
+
+  # --- 地区节点手动选择 ---
+  - {name: '🇭🇰 香港节点', type: select, proxies: ['🇭🇰 香港01|2X', '🇭🇰 香港A1|三网|2X', '🇭🇰 香港A2|电信联通|2倍|V1', '🇭🇰香港1a', '🇭🇰香港2a']}
+  - {name: '🇯🇵 日本节点', type: select, proxies: ['🇯🇵 日本01|2X', '🇯🇵日本软银1', '🇯🇵日本软银2']}
+  - {name: '🇺🇲 美国节点', type: select, proxies: ['🇺🇸 美国01|1X', '🇺🇸 美国02|1X', '🇺🇸 美国03|1X', '🇺🇸 美国H1|实验|1.1倍|V1', '🇺🇸 美国G3|实验|1倍|V1', '🇺🇸 美国F2|电信联通|1.1倍|V1', '🇺🇸 美国C6|0.8倍|V1', '🇺🇸 美国E1|0.7倍|V1', '🇺🇸美国a1', '🇺🇸美国a2', '🇺🇸美国a3', '🇺🇸美国a4']}
+  - {name: '🇸🇬 新加坡节点', type: select, proxies: ['🇸🇬新加坡1 | 0.1×', '🇸🇬新加坡2 | 0.1×', '🇸🇬新加坡3 | 0.1×', '🇸🇬新加坡4 | 0.1×', '🇸🇬新加坡1|BGP', '🇸🇬新加坡2|BGP', '🇸🇬新加坡3|BGP', '🇸🇬新加坡4|BGP']}
+  - {name: '🇹🇼 台湾节点', type: select, proxies: ['🇹🇼台湾1', '🇹🇼台湾2', '🇹🇼台湾3', '🇹🇼台湾4']}
+  - {name: '🇪🇺 欧洲节点', type: select, proxies: ['🇩🇪 德国01|1X', '🇩🇪 德国02|1X', '🇬🇧 英国01|1X', '🇫🇷 法国01|1X', '🇳🇱 荷兰01|1X', '🇩🇪 德国A1|联通|0.7倍|V1', '🇩🇪 德国B2|移动|1.1倍|V1', '🇬🇧 英国A2|联通移动|0.7倍|V1', '🇫🇷 法国A2|联通|0.7倍|V1', '🇳🇱 荷兰A1|联通|0.8倍|V1', '🇳🇱 荷兰B1|联通|0.7倍|V1', '🇷🇺 俄罗斯A1|联通|1倍|V1', '🇩🇪 德国B16️⃣|移动|1.1倍|V1']}
+  - {name: '🌍 其他节点', type: select, proxies: ['🇻🇳 越南01|电信移动|2X', '🇨🇦 加拿大01|1X', '🇨🇦 加拿大A1|0.7倍|V1']}
+  - {name: '🌐 全部节点', type: select, proxies: ['🇻🇳 越南01|电信移动|2X', '🇺🇸 美国01|1X', '🇺🇸 美国02|1X', '🇺🇸 美国03|1X', '🇭🇰 香港01|2X', '🇭🇰 香港A1|三网|2X', '🇯🇵 日本01|2X', '🇨🇦 加拿大01|1X', '🇩🇪 德国01|1X', '🇩🇪 德国02|1X', '🇬🇧 英国01|1X', '🇫🇷 法国01|1X', '🇳🇱 荷兰01|1X', '剩余流量：200 GB', '距离下次重置剩余：31 天', '套餐到期：2027-05-15', '官网：keluosi.top', '🇺🇸 美国H1|实验|1.1倍|V1', '🇺🇸 美国G3|实验|1倍|V1', '🇺🇸 美国F2|电信联通|1.1倍|V1', '🇺🇸 美国C6|0.8倍|V1', '🇺🇸 美国E1|0.7倍|V1', '🇭🇰 香港A2|电信联通|2倍|V1', '🇨🇦 加拿大A1|0.7倍|V1', '🇩🇪 德国A1|联通|0.7倍|V1', '🇩🇪 德国B2|移动|1.1倍|V1', '🇬🇧 英国A2|联通移动|0.7倍|V1', '🇫🇷 法国A2|联通|0.7倍|V1', '🇳🇱 荷兰A1|联通|0.8倍|V1', '🇳🇱 荷兰B1|联通|0.7倍|V1', '🇷🇺 俄罗斯A1|联通|1倍|V1', '🇩🇪 德国B16️⃣|移动|1.1倍|V1', '剩余流量：1000 GB', '套餐到期：长期有效', '🇯🇵日本软银1', '🇯🇵日本软银2', '🇸🇬新加坡1 | 0.1×', '🇸🇬新加坡2 | 0.1×', '🇸🇬新加坡3 | 0.1×', '🇸🇬新加坡4 | 0.1×', '🇸🇬新加坡1|BGP', '🇸🇬新加坡2|BGP', '🇸🇬新加坡3|BGP', '🇸🇬新加坡4|BGP', '🇭🇰香港1a', '🇭🇰香港2a', '🇺🇸美国a1', '🇺🇸美国a2', '🇺🇸美国a3', '🇺🇸美国a4', '🇹🇼台湾1', '🇹🇼台湾2', '🇹🇼台湾3', '🇹🇼台湾4']}
+
+  # --- 地区故障转移 ---
+  - {name: '🔯 香港故转', type: fallback, proxies: ['🇭🇰 香港01|2X', '🇭🇰 香港A1|三网|2X', '🇭🇰 香港A2|电信联通|2倍|V1', '🇭🇰香港1a', '🇭🇰香港2a'], url: 'https://www.gstatic.com/generate_204', tolerance: 20, interval: 300}
+  - {name: '🔯 日本故转', type: fallback, proxies: ['🇯🇵 日本01|2X', '🇯🇵日本软银1', '🇯🇵日本软银2'], url: 'https://www.gstatic.com/generate_204', tolerance: 20, interval: 300}
+  - {name: '🔯 美国故转', type: fallback, proxies: ['🇺🇸 美国01|1X', '🇺🇸 美国02|1X', '🇺🇸 美国03|1X', '🇺🇸 美国H1|实验|1.1倍|V1', '🇺🇸 美国G3|实验|1倍|V1', '🇺🇸 美国F2|电信联通|1.1倍|V1', '🇺🇸 美国C6|0.8倍|V1', '🇺🇸 美国E1|0.7倍|V1', '🇺🇸美国a1', '🇺🇸美国a2', '🇺🇸美国a3', '🇺🇸美国a4'], url: 'https://www.gstatic.com/generate_204', tolerance: 20, interval: 300}
+  - {name: '🔯 新加坡故转', type: fallback, proxies: ['🇸🇬新加坡1 | 0.1×', '🇸🇬新加坡2 | 0.1×', '🇸🇬新加坡3 | 0.1×', '🇸🇬新加坡4 | 0.1×', '🇸🇬新加坡1|BGP', '🇸🇬新加坡2|BGP', '🇸🇬新加坡3|BGP', '🇸🇬新加坡4|BGP'], url: 'https://www.gstatic.com/generate_204', tolerance: 20, interval: 300}
+  - {name: '🔯 台湾故转', type: fallback, proxies: ['🇹🇼台湾1', '🇹🇼台湾2', '🇹🇼台湾3', '🇹🇼台湾4'], url: 'https://www.gstatic.com/generate_204', tolerance: 20, interval: 300}
+  - {name: '🔯 欧洲故转', type: fallback, proxies: ['🇩🇪 德国01|1X', '🇩🇪 德国02|1X', '🇬🇧 英国01|1X', '🇫🇷 法国01|1X', '🇳🇱 荷兰01|1X', '🇩🇪 德国A1|联通|0.7倍|V1', '🇩🇪 德国B2|移动|1.1倍|V1', '🇬🇧 英国A2|联通移动|0.7倍|V1', '🇫🇷 法国A2|联通|0.7倍|V1', '🇳🇱 荷兰A1|联通|0.8倍|V1', '🇳🇱 荷兰B1|联通|0.7倍|V1', '🇷🇺 俄罗斯A1|联通|1倍|V1', '🇩🇪 德国B16️⃣|移动|1.1倍|V1'], url: 'https://www.gstatic.com/generate_204', tolerance: 20, interval: 300}
+  - {name: '🔯 其他故转', type: fallback, proxies: ['🇻🇳 越南01|电信移动|2X', '🇨🇦 加拿大01|1X', '🇨🇦 加拿大A1|0.7倍|V1'], url: 'https://www.gstatic.com/generate_204', tolerance: 20, interval: 300}
+
+  # --- 地区自动测速选优 ---
+  - {name: '♻️ 香港自动', type: url-test, proxies: ['🇭🇰 香港01|2X', '🇭🇰 香港A1|三网|2X', '🇭🇰 香港A2|电信联通|2倍|V1', '🇭🇰香港1a', '🇭🇰香港2a'], url: 'https://www.gstatic.com/generate_204', tolerance: 20, interval: 300}
+  - {name: '♻️ 日本自动', type: url-test, proxies: ['🇯🇵 日本01|2X', '🇯🇵日本软银1', '🇯🇵日本软银2'], url: 'https://www.gstatic.com/generate_204', tolerance: 20, interval: 300}
+  - {name: '♻️ 美国自动', type: url-test, proxies: ['🇺🇸 美国01|1X', '🇺🇸 美国02|1X', '🇺🇸 美国03|1X', '🇺🇸 美国H1|实验|1.1倍|V1', '🇺🇸 美国G3|实验|1倍|V1', '🇺🇸 美国F2|电信联通|1.1倍|V1', '🇺🇸 美国C6|0.8倍|V1', '🇺🇸 美国E1|0.7倍|V1', '🇺🇸美国a1', '🇺🇸美国a2', '🇺🇸美国a3', '🇺🇸美国a4'], url: 'https://www.gstatic.com/generate_204', tolerance: 20, interval: 300}
+  - {name: '♻️ 新加坡自动', type: url-test, proxies: ['🇸🇬新加坡1 | 0.1×', '🇸🇬新加坡2 | 0.1×', '🇸🇬新加坡3 | 0.1×', '🇸🇬新加坡4 | 0.1×', '🇸🇬新加坡1|BGP', '🇸🇬新加坡2|BGP', '🇸🇬新加坡3|BGP', '🇸🇬新加坡4|BGP'], url: 'https://www.gstatic.com/generate_204', tolerance: 20, interval: 300}
+  - {name: '♻️ 台湾自动', type: url-test, proxies: ['🇹🇼台湾1', '🇹🇼台湾2', '🇹🇼台湾3', '🇹🇼台湾4'], url: 'https://www.gstatic.com/generate_204', tolerance: 20, interval: 300}
+  - {name: '♻️ 欧洲自动', type: url-test, proxies: ['🇩🇪 德国01|1X', '🇩🇪 德国02|1X', '🇬🇧 英国01|1X', '🇫🇷 法国01|1X', '🇳🇱 荷兰01|1X', '🇩🇪 德国A1|联通|0.7倍|V1', '🇩🇪 德国B2|移动|1.1倍|V1', '🇬🇧 英国A2|联通移动|0.7倍|V1', '🇫🇷 法国A2|联通|0.7倍|V1', '🇳🇱 荷兰A1|联通|0.8倍|V1', '🇳🇱 荷兰B1|联通|0.7倍|V1', '🇷🇺 俄罗斯A1|联通|1倍|V1', '🇩🇪 德国B16️⃣|移动|1.1倍|V1'], url: 'https://www.gstatic.com/generate_204', tolerance: 20, interval: 300}
+  - {name: '♻️ 其他自动', type: url-test, proxies: ['🇻🇳 越南01|电信移动|2X', '🇨🇦 加拿大01|1X', '🇨🇦 加拿大A1|0.7倍|V1'], url: 'https://www.gstatic.com/generate_204', tolerance: 20, interval: 300}
+  - {name: '♻️ 自动选择', type: url-test, proxies: ['🇻🇳 越南01|电信移动|2X', '🇺🇸 美国01|1X', '🇺🇸 美国02|1X', '🇺🇸 美国03|1X', '🇭🇰 香港01|2X', '🇭🇰 香港A1|三网|2X', '🇯🇵 日本01|2X', '🇨🇦 加拿大01|1X', '🇩🇪 德国01|1X', '🇩🇪 德国02|1X', '🇬🇧 英国01|1X', '🇫🇷 法国01|1X', '🇳🇱 荷兰01|1X', '剩余流量：200 GB', '距离下次重置剩余：31 天', '套餐到期：2027-05-15', '官网：keluosi.top', '🇺🇸 美国H1|实验|1.1倍|V1', '🇺🇸 美国G3|实验|1倍|V1', '🇺🇸 美国F2|电信联通|1.1倍|V1', '🇺🇸 美国C6|0.8倍|V1', '🇺🇸 美国E1|0.7倍|V1', '🇭🇰 香港A2|电信联通|2倍|V1', '🇨🇦 加拿大A1|0.7倍|V1', '🇩🇪 德国A1|联通|0.7倍|V1', '🇩🇪 德国B2|移动|1.1倍|V1', '🇬🇧 英国A2|联通移动|0.7倍|V1', '🇫🇷 法国A2|联通|0.7倍|V1', '🇳🇱 荷兰A1|联通|0.8倍|V1', '🇳🇱 荷兰B1|联通|0.7倍|V1', '🇷🇺 俄罗斯A1|联通|1倍|V1', '🇩🇪 德国B16️⃣|移动|1.1倍|V1', '剩余流量：1000 GB', '套餐到期：长期有效', '🇯🇵日本软银1', '🇯🇵日本软银2', '🇸🇬新加坡1 | 0.1×', '🇸🇬新加坡2 | 0.1×', '🇸🇬新加坡3 | 0.1×', '🇸🇬新加坡4 | 0.1×', '🇸🇬新加坡1|BGP', '🇸🇬新加坡2|BGP', '🇸🇬新加坡3|BGP', '🇸🇬新加坡4|BGP', '🇭🇰香港1a', '🇭🇰香港2a', '🇺🇸美国a1', '🇺🇸美国a2', '🇺🇸美国a3', '🇺🇸美国a4', '🇹🇼台湾1', '🇹🇼台湾2', '🇹🇼台湾3', '🇹🇼台湾4'], url: 'https://www.gstatic.com/generate_204', tolerance: 20, interval: 300}
+
+rules:
+  - DOMAIN-SUFFIX,ipapi.co,REJECT-DROP
+  - DOMAIN-SUFFIX,ipapi.is,REJECT-DROP
+  - DOMAIN-SUFFIX,ipwho.is,REJECT-DROP
+  - DOMAIN-SUFFIX,ip.sb,REJECT-DROP
+  - RULE-SET,private_domain,🟢 直连
+  - RULE-SET,apple_domain,🍎 Apple
+  - RULE-SET,ai,🤖 ChatGPT
+  - RULE-SET,github_domain,👨🏿‍💻 GitHub
+  - RULE-SET,youtube_domain,📹 YouTube
+  - RULE-SET,google_domain,🍀 Google
+  - RULE-SET,onedrive_domain,🐬 OneDrive
+  - RULE-SET,microsoft_domain,🪟 Microsoft
+  - RULE-SET,tiktok_domain,🎵 TikTok
+  - RULE-SET,speedtest_domain,✈️ Speedtest
+  - RULE-SET,telegram_domain,📲 Telegram
+  - RULE-SET,netflix_domain,🎥 NETFLIX
+  - RULE-SET,paypal_domain,💶 PayPal
+  - RULE-SET,gfw_domain,🚀 默认代理
+  - RULE-SET,geolocation-!cn,🚀 默认代理
+  - RULE-SET,cn_domain,🎯 直连
+  - RULE-SET,google_ip,🍀 Google,no-resolve
+  - RULE-SET,netflix_ip,🎥 NETFLIX,no-resolve
+  - RULE-SET,telegram_ip,📲 Telegram,no-resolve
+  - RULE-SET,cn_ip,🎯 直连
+  - MATCH,🐟 漏网之鱼
+
+rule-anchor:
+  ip: &ip {type: http, interval: 86400, behavior: ipcidr, format: mrs}
+  domain: &domain {type: http, interval: 86400, behavior: domain, format: mrs}
+  class: &class {type: http, interval: 86400, behavior: classical, format: text}
+
+rule-providers:
+  private_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/private.mrs"}
+  ai: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs"}
+  youtube_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/youtube.mrs"}
+  google_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/google.mrs"}
+  github_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/github.mrs"}
+  telegram_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs"}
+  netflix_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/netflix.mrs"}
+  paypal_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/paypal.mrs"}
+  onedrive_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/onedrive.mrs"}
+  microsoft_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/microsoft.mrs"}
+  apple_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/apple-cn.mrs"}
+  speedtest_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/ookla-speedtest.mrs"}
+  tiktok_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/tiktok.mrs"}
+  gfw_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/gfw.mrs"}
+  geolocation-!cn: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/geolocation-!cn.mrs"}
+  cn_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/cn.mrs"}
+  cn_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/cn.mrs"}
+  google_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/google.mrs"}
+  telegram_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/telegram.mrs"}
+  netflix_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/netflix.mrs"}
