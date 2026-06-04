@@ -152,6 +152,7 @@ rules:
   - DOMAIN-SUFFIX,toomics.com,🚀 默认代理
   - DOMAIN-SUFFIX,toptoon.top,🚀 默认代理
   - DOMAIN-SUFFIX,ru,🚀 默认代理
+  - DOMAIN-SUFFIX,omegascans.org,🚀 默认代理
   - RULE-SET,proxylite,🚀 默认代理
   - RULE-SET,ai,🤖 ChatGPT
   - RULE-SET,github_domain,👨🏿‍💻 GitHub
