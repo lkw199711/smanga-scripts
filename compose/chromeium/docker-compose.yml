@@ -1,22 +1,23 @@
 services:
   chromium:
-    image: lscr.io/linuxserver/chromium:latest  # 使用linuxserver维护的稳定版镜像[citation:1][citation:3]
+    image: linuxserver/chromium:latest  # 使用linuxserver维护的稳定版镜像[citation:1][citation:3]
     container_name: chromium                     # 容器名称，后续管理用
     environment:
       - PUID=1000                                # 用户ID，用于文件权限（按需修改）[citation:9]
       - PGID=1000                                # 用户组ID（按需修改）[citation:9]
       - TZ=Asia/Shanghai                         # 设置时区为上海[citation:1][citation:9]
-      - CUSTOM_PORT=8080                         # 将容器内 HTTP 端口改为 8080
-      - CUSTOM_HTTPS_PORT=8443                   # 将容器内 HTTPS 端口改为 8443
+      - CUSTOM_PORT=3000                         # 容器内 HTTP 端口
+      - CUSTOM_HTTPS_PORT=3001                   # 容器内 HTTPS 端口
       - LC_ALL=zh_CN.UTF-8                       # 设置语言为中文[citation:1][citation:9]
-      #- CUSTOM_USER=your_username                # 【可选】设置网页访问的用户名[citation:3]
-      #- PASSWORD=your_password                   # 【可选】设置网页访问的密码[citation:3]
-      - CHROME_CLI=https://192.168.5.10:3002      # 启动时自动打开的网址[citation:1]
-      #- HTTP_PROXY=http://Clash:ykt3thsw@192.168.100.1:7893
-      #- HTTPS_PROXY=http://Clash:ykt3thsw@192.168.100.1:7893
+      #- CUSTOM_USER=abc                          # 【可选】Web界面访问用户名
+      #- PASSWORD=abc                             # 【可选】Web界面访问密码
+      - "CHROME_CLI=--proxy-server=http://Clash:ykt3thsw@192.168.100.1:7893"
+      - HTTP_PROXY=http://Clash:ykt3thsw@192.168.100.1:7893
+      - HTTPS_PROXY=http://Clash:ykt3thsw@192.168.100.1:7893
     volumes:
       - ./config:/config                         # 挂载配置目录，保存书签、密码等，防止丢失[citation:1][citation:3]
     ports:
-      - "8080:8080"                             # 将宿主机的13001端口映射到容器的HTTPS端口[citation:1][citation:4]
-    shm_size: "1gb"                              # 共享内存大小，防止网页加载或渲染时崩溃[citation:1][citation:3]
+      - 8000:3000                                # HTTP 访问（http://host:8000）
+      - 8443:3001                                # HTTPS 访问（https://host:8443）
+    shm_size: 1gb                              # 共享内存大小，防止网页加载或渲染时崩溃[citation:1][citation:3]
     restart: unless-stopped                      # 容器退出策略，保证开机自启[citation:1][citation:3]
