@@ -122,6 +122,7 @@ proxy-groups:
   - {name: 📲 Telegram, type: select, proxies: [🚀 默认代理, 🔯 香港故转, 🔯 日本故转, 🔯 狮城故转, 🔯 美国故转, 🔯 欧洲故转, 🔯 其他故转, ♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 欧洲自动, ♻️ 其他自动, ♻️ 自动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇪🇺 欧洲节点, 🌍 其他节点, 🌐 全部节点, 直连]}
   - {name: 🎥 NETFLIX, type: select, proxies: [🚀 默认代理, 🔯 狮城故转, 🔯 香港故转, 🔯 日本故转, 🔯 美国故转, 🔯 欧洲故转, 🔯 其他故转, ♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 欧洲自动, ♻️ 其他自动, ♻️ 自动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇪🇺 欧洲节点, 🌍 其他节点, 🌐 全部节点, 直连]}
   - {name: 💶 PayPal, type: select, proxies: [🚀 默认代理, 🔯 日本故转, 🔯 香港故转, 🔯 狮城故转, 🔯 美国故转, 🔯 欧洲故转, 🔯 其他故转, ♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 欧洲自动, ♻️ 其他自动, ♻️ 自动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇪🇺 欧洲节点, 🌍 其他节点, 🌐 全部节点, 直连]}
+  - {name: 📚 Manga, type: select, proxies: [🚀 默认代理, 🔯 香港故转, 🔯 日本故转, 🔯 狮城故转, 🔯 美国故转, 🔯 欧洲故转, 🔯 其他故转, ♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 欧洲自动, ♻️ 其他自动, ♻️ 自动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇪🇺 欧洲节点, 🌍 其他节点, 🌐 全部节点, 直连]}
   - {name: 🐟 漏网之鱼, type: select, proxies: [🚀 默认代理, 🔯 香港故转, 🔯 日本故转, 🔯 狮城故转, 🔯 美国故转, 🔯 欧洲故转, 🔯 其他故转, ♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 欧洲自动, ♻️ 其他自动, ♻️ 自动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇪🇺 欧洲节点, 🌍 其他节点, 🌐 全部节点, 直连]}
   - {name: 🇭🇰 香港节点, type: select, include-all: true, filter: "(?=.*(港|HK|(?i)Hong))^((?!(台|日|韩|新|深|美)).)*$"}
   - {name: 🇯🇵 日本节点, type: select, include-all: true, filter: "(?=.*(日|JP|(?i)Japan))^((?!(港|台|韩|新|美)).)*$"}
@@ -148,11 +149,9 @@ proxy-groups:
 rules:
   - RULE-SET,private_ip,直连,no-resolve
   - RULE-SET,private_domain,直连
-  - DOMAIN-SUFFIX,qichiyu.com,🚀 默认代理
-  - DOMAIN-SUFFIX,toomics.com,🚀 默认代理
-  - DOMAIN-SUFFIX,toptoon.top,🚀 默认代理
-  - DOMAIN-SUFFIX,ru,🚀 默认代理
-  - DOMAIN-SUFFIX,omegascans.org,🚀 默认代理
+  - RULE-SET,my_proxy,🚀 默认代理
+  - RULE-SET,manga_proxy,📚 Manga
+  - RULE-SET,manga_keyword,📚 Manga
   - RULE-SET,proxylite,🚀 默认代理
   - RULE-SET,ai,🤖 ChatGPT
   - RULE-SET,github_domain,👨🏿‍💻 GitHub
@@ -205,3 +204,32 @@ rule-providers:
   telegram_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/telegram.mrs"}
   netflix_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/netflix.mrs"}
   apple_ip: {<<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo-lite/geoip/apple.mrs"}
+
+  # 自定义代理域名列表 —— 需要走代理的域名直接加在 payload 下面
+  my_proxy:
+    type: inline
+    behavior: domain
+    payload:
+      - "+.qichiyu.com"
+      - "+.ru"
+      # 在此添加更多域名，格式: - "+.example.com"
+
+  # 漫画相关域名
+  manga_proxy:
+    type: inline
+    behavior: domain
+    payload:
+      - "+.toomics.com"
+      - "+.toptoon.top"
+      - "+.omegascans.org"
+      - "+.99web.cc"
+      - "+.freexcomic.com"
+      # 在此添加更多漫画域名
+
+  # 漫画关键字规则（DOMAIN-KEYWORD / DOMAIN-REGEX 等）
+  manga_keyword:
+    type: inline
+    behavior: classical
+    payload:
+      - "DOMAIN-KEYWORD,jjmhw"
+      # 继续添加其他关键字或正则规则
