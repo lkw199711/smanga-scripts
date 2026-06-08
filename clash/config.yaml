@@ -212,6 +212,8 @@ rule-providers:
     payload:
       - "+.qichiyu.com"
       - "+.ru"
+      - "+.giffgaff.com"
+      - "+.套路云.com"
       # 在此添加更多域名，格式: - "+.example.com"
 
   # 漫画相关域名
