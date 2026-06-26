@@ -13,15 +13,15 @@ proxy-providers:
       url: https://www.gstatic.com/generate_204
       interval: 300
     proxy: 直连
-  奶云:
-    url: "https://212.47.238.39/api/v1/client/subscribe?token=4e1949e60aa4204c1c438ce2c2366739"
-    type: http
-    interval: 86400
-    health-check:
-      enable: true
-      url: https://www.gstatic.com/generate_204
-      interval: 300
-    proxy: 直连
+  # 奶云:
+  #   url: "https://212.47.238.39/api/v1/client/subscribe?token=4e1949e60aa4204c1c438ce2c2366739"
+  #   type: http
+  #   interval: 86400
+  #   health-check:
+  #     enable: true
+  #     url: https://www.gstatic.com/generate_204
+  #     interval: 300
+  #   proxy: 直连
   蜜雪冰城:
     url: "https://5201314.kad520.uk/api/kad520s/7d4a0b4fd145f3a28f3805c35f03889a"
     type: http
@@ -214,6 +214,8 @@ rule-providers:
       - "+.ru"
       - "+.giffgaff.com"
       - "+.套路云.com"
+      - "+.milkcloud.org"
+      - "+.audiences.me"
       # 在此添加更多域名，格式: - "+.example.com"
 
   # 漫画相关域名
