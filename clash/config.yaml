@@ -225,6 +225,7 @@ rule-providers:
       - "+.kitty.work"
       # - "+.naiyun.vip"
       - "+.hembed.com"
+      - "+.kitesim.co"
       # 在此添加更多域名，格式: - "+.example.com"
 
   # 漫画相关域名
