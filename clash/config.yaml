@@ -226,6 +226,7 @@ rule-providers:
       # - "+.naiyun.vip"
       - "+.hembed.com"
       - "+.kitesim.co"
+      - "+.foobar2000.org"
       # 在此添加更多域名，格式: - "+.example.com"
 
   # 漫画相关域名
