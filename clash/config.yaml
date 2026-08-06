@@ -153,9 +153,9 @@ proxy-groups:
 rules:
   - RULE-SET,private_ip,直连,no-resolve
   - RULE-SET,private_domain,直连
-  - RULE-SET,my_proxy,🚀 默认代理
   - RULE-SET,manga_proxy,📚 Manga
   - RULE-SET,manga_keyword,📚 Manga
+  - RULE-SET,my_proxy,🚀 默认代理
   - RULE-SET,proxylite,🚀 默认代理
   - RULE-SET,ai,🤖 ChatGPT
   - RULE-SET,github_domain,👨🏿‍💻 GitHub
@@ -239,6 +239,7 @@ rule-providers:
       - "+.omegascans.org"
       - "+.99web.cc"
       - "+.freexcomic.com"
+      - "+.wnacg.ru"
       # 在此添加更多漫画域名
 
   # 漫画关键字规则（DOMAIN-KEYWORD / DOMAIN-REGEX 等）
