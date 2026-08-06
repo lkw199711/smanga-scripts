@@ -240,6 +240,7 @@ rule-providers:
       - "+.99web.cc"
       - "+.freexcomic.com"
       - "+.wnacg.ru"
+      - "+.qy0.ru"
       # 在此添加更多漫画域名
 
   # 漫画关键字规则（DOMAIN-KEYWORD / DOMAIN-REGEX 等）
