@@ -153,6 +153,9 @@ proxy-groups:
 rules:
   - RULE-SET,private_ip,直连,no-resolve
   - RULE-SET,private_domain,直连
+  # Steam 游戏内容下载优先直连；必须位于自定义代理和通用代理规则之前
+  - RULE-SET,steam_download_domain,直连
+  - RULE-SET,steam_cn_domain,直连
   - RULE-SET,manga_proxy,📚 Manga
   - RULE-SET,manga_keyword,📚 Manga
   - RULE-SET,my_proxy,🚀 默认代理
@@ -167,6 +170,7 @@ rules:
   - RULE-SET,tiktok_domain,🎵 TikTok
   - RULE-SET,telegram_domain,📲 Telegram
   - RULE-SET,netflix_domain,🎥 NETFLIX
+  # Steam 商店、社区等其他流量仍由 Steam 分组控制
   - RULE-SET,steam_domain,🎮 Steam
   - RULE-SET,paypal_domain,💶 PayPal
   - RULE-SET,apple_ip,直连
@@ -194,6 +198,7 @@ rule-providers:
   github_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/github.mrs"}
   telegram_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs"}
   netflix_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/netflix.mrs"}
+  steam_cn_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/steam@cn.mrs"}
   steam_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/steam.mrs"}
   paypal_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/paypal.mrs"}
   onedrive_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/onedrive.mrs"}
@@ -210,6 +215,32 @@ rule-providers:
   telegram_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/telegram.mrs"}
   netflix_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/netflix.mrs"}
   apple_ip: {<<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo-lite/geoip/apple.mrs"}
+
+  # SteamPipe 内容/CDN 域名，补充 steam@cn 未覆盖的国际回退下载节点
+  steam_download_domain:
+    type: inline
+    behavior: domain
+    payload:
+      - "+.steamcontent.com"
+      - "+.steamserver.net"
+      - "steamcdn-a.akamaihd.net"
+      - "steampipe.akamaized.net"
+      - "steampipe-kr.akamaized.net"
+      - "steampipe-partner.akamaized.net"
+      - "steam.apac.qtlglb.com"
+      - "steam.eca.qtlglb.com"
+      - "steam.naeu.qtlglb.com"
+      - "steam.ru.qtlglb.com"
+      - "steam.cdn.on.net"
+      - "steam.cdn.orcon.net.nz"
+      - "steam.cdn.slingshot.co.nz"
+      - "steam.cdn.webra.ru"
+      - "edge.steam-dns.top.comcast.net"
+      - "a4e8s8k3.map2.ssl.hwcdn.net"
+      - "f3b7q2p3.ssl.hwcdn.net"
+      - "client-download.steampowered.com"
+      - "content.steampowered.com"
+      - "content-origin.steampowered.com"
 
   # 自定义代理域名列表 —— 需要走代理的域名直接加在 payload 下面
   my_proxy:
