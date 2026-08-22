@@ -250,7 +250,8 @@ rule-providers:
     type: inline
     behavior: domain
     payload:
-      - "ipv4.test-ipv6.com"
+      # test-ipv6.com 测试页会通过 *.losangeles、*.lookup 等子域回显IP，需整域直连
+      - "+.test-ipv6.com"
       # 在此添加更多直连域名，格式: - "example.com" 或 - "+.example.com"
 
   # 自定义代理域名列表 —— 需要走代理的域名直接加在 payload 下面
