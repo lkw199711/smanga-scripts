@@ -124,6 +124,7 @@ proxy-groups:
   - {name: 🎮 Steam, type: select, proxies: [🚀 默认代理, 🔯 香港故转, 🔯 日本故转, 🔯 狮城故转, 🔯 美国故转, 🔯 欧洲故转, 🔯 台湾故转, 🔯 其他故转, ♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 欧洲自动, ♻️ 台湾自动, ♻️ 其他自动, ♻️ 自动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇪🇺 欧洲节点, 🇹🇼 台湾节点, 🌍 其他节点, 🌐 全部节点, 直连]}
   - {name: 💶 PayPal, type: select, proxies: [🚀 默认代理, 🔯 日本故转, 🔯 香港故转, 🔯 狮城故转, 🔯 美国故转, 🔯 欧洲故转, 🔯 台湾故转, 🔯 其他故转, ♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 欧洲自动, ♻️ 台湾自动, ♻️ 其他自动, ♻️ 自动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇪🇺 欧洲节点, 🇹🇼 台湾节点, 🌍 其他节点, 🌐 全部节点, 直连]}
   - {name: 📚 Manga, type: select, proxies: [🚀 默认代理, 🔯 香港故转, 🔯 日本故转, 🔯 狮城故转, 🔯 美国故转, 🔯 欧洲故转, 🔯 台湾故转, 🔯 其他故转, ♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 欧洲自动, ♻️ 台湾自动, ♻️ 其他自动, ♻️ 自动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇪🇺 欧洲节点, 🇹🇼 台湾节点, 🌍 其他节点, 🌐 全部节点, 直连]}
+  - {name: 🛡️ 自定义直连, type: select, proxies: [直连, 🚀 默认代理, ♻️ 自动选择, 🌐 全部节点]}
   - {name: 🐟 漏网之鱼, type: select, proxies: [🚀 默认代理, 🔯 香港故转, 🔯 日本故转, 🔯 狮城故转, 🔯 美国故转, 🔯 欧洲故转, 🔯 台湾故转, 🔯 其他故转, ♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 欧洲自动, ♻️ 台湾自动, ♻️ 其他自动, ♻️ 自动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇪🇺 欧洲节点, 🇹🇼 台湾节点, 🌍 其他节点, 🌐 全部节点, 直连]}
   - {name: 🇭🇰 香港节点, type: select, include-all: true, filter: "(?=.*(港|HK|(?i)Hong))^((?!(台|湾|TW|(?i)Taiwan|日|韩|新|深|美)).)*$"}
   - {name: 🇯🇵 日本节点, type: select, include-all: true, filter: "(?=.*(日|JP|(?i)Japan))^((?!(港|台|湾|TW|(?i)Taiwan|韩|新|美)).)*$"}
@@ -153,6 +154,8 @@ proxy-groups:
 rules:
   - RULE-SET,private_ip,直连,no-resolve
   - RULE-SET,private_domain,直连
+  # 自定义直连域名，命中 🛡️ 自定义直连分组（默认直连，可在面板切换为代理）
+  - RULE-SET,my_direct,🛡️ 自定义直连
   # Steam 游戏内容下载优先直连；必须位于自定义代理和通用代理规则之前
   - RULE-SET,steam_download_domain,直连
   - RULE-SET,steam_cn_domain,直连
@@ -241,6 +244,14 @@ rule-providers:
       - "client-download.steampowered.com"
       - "content.steampowered.com"
       - "content-origin.steampowered.com"
+
+  # 自定义直连域名列表 —— 命中 🛡️ 自定义直连分组（默认直连，可在面板切换为代理）
+  my_direct:
+    type: inline
+    behavior: domain
+    payload:
+      - "ipv4.test-ipv6.com"
+      # 在此添加更多直连域名，格式: - "example.com" 或 - "+.example.com"
 
   # 自定义代理域名列表 —— 需要走代理的域名直接加在 payload 下面
   my_proxy:
