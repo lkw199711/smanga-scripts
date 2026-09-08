@@ -270,6 +270,8 @@ rule-providers:
       - "+.hembed.com"
       - "+.kitesim.co"
       - "+.foobar2000.org"
+      - "+.laowang.vip"
+      - "+.hanime1.me"
       # 在此添加更多域名，格式: - "+.example.com"
 
   # 漫画相关域名
