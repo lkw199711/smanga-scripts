@@ -283,6 +283,8 @@ rule-providers:
       - "+.kitesim.co"
       - "+.foobar2000.org"
       - "+.laowang.vip"
+      - "+.linkaa.xyz"
+      - "+.kitty.fo"
       # 在此添加更多域名，格式: - "+.example.com"
 
   # 因版权限制不能使用日本 IP 的网站
