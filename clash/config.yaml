@@ -4,6 +4,15 @@
 # 跑裸核用户请自行去掉下方控制面板模块的注释。
 # 机场订阅
 proxy-providers:
+  飞喵云:
+    url: "https://dafm.kuaikuaimao.top/feimiao/as?token=91cd398d8d4627e5dc6917ede5db9dec"
+    type: http
+    interval: 86400
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 300
+    proxy: 直连
   套路云:
     url: "http://51.254.174.163/api/v1/client/subscribe?token=4cf301139b7c5916c46a8b0183d48174"
     type: http
