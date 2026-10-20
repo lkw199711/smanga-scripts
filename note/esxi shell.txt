@@ -1,0 +1,5 @@
+esxcli storage core device smart get -d t10.ATA_____SOYO_SSD_WC1T___________________________YS20230504076925____
+1t
+
+200g
+esxcli storage core device smart get -d t10.ATA_____SOYO_SSD_WC240G_________________________YS20230260000036____
