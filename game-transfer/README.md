@@ -8,14 +8,14 @@
 
 - Debian/Linux AMD64 或 ARM64
 - Node.js 20.18.1 或更高版本
-- pnpm
+- npm（也可使用 pnpm）
 - 已安装并登录 `bdpan`
 
 ## 安装
 
 ```bash
 cd game-transfer
-pnpm install
+npm install
 ```
 
 如果 `bdpan` 不在 PATH 中，可以在 `.env` 或系统环境中设置：
@@ -31,7 +31,7 @@ BDPAN_BIN=/home/lkw/.local/bin/bdpan
 默认不会写入网盘：
 
 ```bash
-pnpm start -- \
+npm start -- \
   --catalog ../game-catalog/data/acgyyg/2026-10.json \
   --limit 1
 ```
@@ -43,7 +43,7 @@ pnpm start -- \
 确认预览正确后，显式加入 `--execute`：
 
 ```bash
-pnpm start -- \
+npm start -- \
   --catalog ../game-catalog/data/acgyyg/2026-10.json \
   --limit 1 \
   --execute
@@ -64,7 +64,7 @@ pnpm start -- \
 ## 批量运行
 
 ```bash
-pnpm start -- \
+npm start -- \
   --catalog ../game-catalog/data/acgyyg/2026-10.json \
   --execute
 ```
@@ -81,11 +81,45 @@ pnpm start -- \
 
 状态文件只保存分享指纹，不保存原始分享链接和提取码；文件权限为 `0600`。
 
+## 调试时清除单条转存记录
+
+清除操作按文章 ID 定位，只修改本地状态文件，不会调用 `bdpan`，也不会删除网盘文件。先预览：
+
+```bash
+npm start -- \
+  --catalog ../game-catalog/data/acgyyg/2026-09.json \
+  --post-id 31526 \
+  --clear-record
+```
+
+确认后加入 `--execute`：
+
+```bash
+npm start -- \
+  --catalog ../game-catalog/data/acgyyg/2026-09.json \
+  --post-id 31526 \
+  --clear-record \
+  --execute
+```
+
+清除以后，该游戏会重新成为待转存项目。再次转存前请确认或移走百度网盘中已经存在的同名目录，否则可能发生重复或名称冲突。
+
 ## 校验
 
 ```bash
-pnpm typecheck
-pnpm test
+npm run typecheck
+npm test
 ```
 
-旧版本已经产生的双层目录不会被自动删除或移动。请先人工处理测试目录，随后用新版对新的游戏进行 PoC。
+## 修复旧版已经产生的双层目录
+
+旧状态中的 `completed` 会继续被正常运行跳过，防止同一个分享被重复转存。先预览指定文章的修复：
+
+```bash
+npm start -- \
+  --catalog ../game-catalog/data/acgyyg/2026-09.json \
+  --post-id 31526 \
+  --repair-completed
+```
+
+确认文章与正式目录正确后，再加入 `--execute`。修复程序只接受一个明确的 `--post-id`，并要求正式目录中恰好只有一个内层文件夹。它会逐项上移内层内容，复查内层目录为空后才删除该空目录；任一安全检查不满足都会停止，不会重新转存分享。

@@ -31,6 +31,14 @@ export async function saveState(statePath: string, state: TransferStateFile): Pr
   await fs.rename(temporaryPath, statePath);
 }
 
+export function clearStateRecord(state: TransferStateFile, postId: number): TransferRecord | null {
+  const key = String(postId);
+  const existing = state.records[key];
+  if (!existing) return null;
+  delete state.records[key];
+  return existing;
+}
+
 export function shouldProcess(
   existing: TransferRecord | undefined,
   item: TransferPlanItem,
@@ -42,4 +50,13 @@ export function shouldProcess(
   if (existing.status === 'transferred') return { process: true, reason: '转存已完成，继续整理目录' };
   if (existing.status === 'failed' && !retryFailed) return { process: false, reason: '上次失败；使用 --retry-failed 才会重试' };
   return { process: true, reason: null };
+}
+
+export function needsLegacyLayoutRepair(
+  existing: TransferRecord | undefined,
+  item: TransferPlanItem,
+): boolean {
+  return existing?.status === 'completed'
+    && existing.share_fingerprint === item.share_fingerprint
+    && existing.layout_version !== 2;
 }

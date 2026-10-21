@@ -53,6 +53,10 @@ export interface TransferRecord {
   saved_paths: string[];
   transferred_items: TransferredItem[];
   final_path: string | null;
+  /** 2 表示目录已经按“月份/正式游戏名”整理为单层结构。 */
+  layout_version?: 2;
+  /** 旧版双层目录修复时保存的内层目录，供中断后安全续跑。 */
+  repair_source_path?: string | null;
   attempts: number;
   last_error: string | null;
   updated_at: string;

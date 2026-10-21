@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 import path from 'node:path';
-import type { InterpretedTransferResult, TransferPlanItem } from './types.js';
+import type { InterpretedTransferResult, TransferredItem, TransferPlanItem } from './types.js';
 
 interface CommandResult {
   stdout: string;
@@ -91,6 +91,32 @@ export function interpretTransferResult(value: unknown): InterpretedTransferResu
   throw new BdpanCommandError('bdpan 返回内容无法确认转存已经提交或完成');
 }
 
+export function interpretListResult(value: unknown): TransferredItem[] {
+  if (!Array.isArray(value)) throw new BdpanCommandError('bdpan ls 返回结果不是 JSON 数组');
+  return value.map((entry) => {
+    const item = asObject(entry);
+    const remotePath = item ? stringValue(item.path) ?? stringValue(item.remote_path) : null;
+    if (!item || !remotePath) throw new BdpanCommandError('bdpan ls 返回了缺少 path 的项目');
+    const name = stringValue(item.server_filename) ?? stringValue(item.name) ?? path.posix.basename(remotePath);
+    return {
+      name,
+      path: remotePath,
+      saved_path: stringValue(item.saved_path),
+      is_dir: item.isdir === true || item.isdir === 1 || item.is_dir === true || item.is_dir === 1,
+    };
+  });
+}
+
+function relativeAppPath(remotePath: string): string {
+  const normalized = path.posix.normalize(remotePath.replace(/\\/gu, '/'));
+  const prefix = '/apps/bdpan/';
+  const relative = normalized.startsWith(prefix) ? normalized.slice(prefix.length) : normalized.replace(/^\/+/, '');
+  if (!relative || relative === '..' || relative.startsWith('../')) {
+    throw new BdpanCommandError(`拒绝操作应用目录之外的路径：${remotePath}`);
+  }
+  return relative;
+}
+
 export function redactSensitiveText(text: string, item: TransferPlanItem): string {
   let redacted = text.replaceAll(item.share_url, '[分享链接已隐藏]');
   if (item.share_code) redacted = redacted.replaceAll(item.share_code, '[提取码已隐藏]');
@@ -153,6 +179,49 @@ export class BdpanClient {
       finalPaths.push(path.posix.join('/apps/bdpan', item.target_dir, transferred.name));
     }
     return finalPaths;
+  }
+
+  async findLegacyNestedDirectory(item: TransferPlanItem): Promise<string> {
+    const children = await this.list(item.target_dir);
+    if (children.length !== 1 || !children[0]?.is_dir) {
+      throw new BdpanCommandError(
+        `旧目录修复要求“${item.target_dir}”中恰好只有一个内层文件夹；当前有 ${children.length} 个顶层项目，已拒绝自动处理`,
+      );
+    }
+    const nestedPath = relativeAppPath(children[0].path);
+    if (path.posix.dirname(nestedPath) !== item.target_dir) {
+      throw new BdpanCommandError(`内层目录不在预期位置，已拒绝处理：${children[0].path}`);
+    }
+    return nestedPath;
+  }
+
+  async repairLegacyNestedDirectory(item: TransferPlanItem, nestedPathInput: string): Promise<string[]> {
+    const nestedPath = relativeAppPath(nestedPathInput);
+    if (path.posix.dirname(nestedPath) !== item.target_dir || nestedPath === item.target_dir) {
+      throw new BdpanCommandError(`修复源目录不在正式游戏目录的下一层，已拒绝处理：${nestedPathInput}`);
+    }
+
+    const nestedItems = await this.list(nestedPath);
+    for (const nestedItem of nestedItems) {
+      const sourcePath = relativeAppPath(nestedItem.path);
+      if (path.posix.dirname(sourcePath) !== nestedPath) {
+        throw new BdpanCommandError(`内层项目不在预期目录，已拒绝移动：${nestedItem.path}`);
+      }
+      await this.run(['mv', sourcePath, item.target_dir, '--json']);
+    }
+
+    const remaining = await this.list(nestedPath);
+    if (remaining.length !== 0) {
+      throw new BdpanCommandError(`内层目录仍有 ${remaining.length} 个项目，已拒绝删除：${nestedPath}`);
+    }
+    await this.run(['rm', nestedPath, '--force', '--json']);
+    const finalItems = await this.list(item.target_dir);
+    return finalItems.map((entry) => entry.path);
+  }
+
+  private async list(remotePath: string): Promise<TransferredItem[]> {
+    const result = await this.run(['ls', remotePath, '--json']);
+    return interpretListResult(parseJsonOutput(result.stdout));
   }
 
   private run(args: string[]): Promise<CommandResult> {

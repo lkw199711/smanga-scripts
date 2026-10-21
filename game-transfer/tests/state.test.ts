@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { shouldProcess } from '../src/state.js';
-import type { TransferPlanItem, TransferRecord } from '../src/types.js';
+import { clearStateRecord, needsLegacyLayoutRepair, shouldProcess } from '../src/state.js';
+import type { TransferPlanItem, TransferRecord, TransferStateFile } from '../src/types.js';
 
 const item: TransferPlanItem = {
   post_id: 1,
@@ -49,4 +49,28 @@ test('resumes directory normalization without resubmitting the share', () => {
 
 test('processes a changed share link even if the old one completed', () => {
   assert.equal(shouldProcess(record('completed', 'old-hash'), item, false).process, true);
+});
+
+test('recognizes only matching legacy completed records as repairable', () => {
+  const legacy = record('completed');
+  assert.equal(needsLegacyLayoutRepair(legacy, item), true);
+  legacy.layout_version = 2;
+  assert.equal(needsLegacyLayoutRepair(legacy, item), false);
+  assert.equal(needsLegacyLayoutRepair(record('failed'), item), false);
+  assert.equal(needsLegacyLayoutRepair(record('completed', 'old-hash'), item), false);
+});
+
+test('clears only the requested transfer record', () => {
+  const first = record('completed');
+  const second = { ...record('failed'), post_id: 2 };
+  const state: TransferStateFile = {
+    schema_version: 1,
+    source: { catalog_path: '/catalog.json', month: '2026-10' },
+    updated_at: new Date(0).toISOString(),
+    records: { '1': first, '2': second },
+  };
+  assert.equal(clearStateRecord(state, 1), first);
+  assert.deepEqual(Object.keys(state.records), ['2']);
+  assert.equal(clearStateRecord(state, 999), null);
+  assert.deepEqual(Object.keys(state.records), ['2']);
 });

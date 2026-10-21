@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { BdpanCommandError, interpretTransferResult, parseJsonOutput, redactSensitiveText } from '../src/bdpan.js';
+import { BdpanCommandError, interpretListResult, interpretTransferResult, parseJsonOutput, redactSensitiveText } from '../src/bdpan.js';
 import type { TransferPlanItem } from '../src/types.js';
 
 test('interprets completed transfer output', () => {
@@ -51,4 +51,18 @@ test('redacts the URL and extraction code from errors', () => {
   };
   const redacted = redactSensitiveText('failed https://pan.baidu.com/s/private code a1b2', item);
   assert.equal(redacted, 'failed [分享链接已隐藏] code [提取码已隐藏]');
+});
+
+test('interprets ls output used by legacy layout repair', () => {
+  assert.deepEqual(interpretListResult([{
+    path: '/apps/bdpan/games/2026-09/formal/share-name',
+    server_filename: 'share-name',
+    isdir: true,
+  }]), [{
+    name: 'share-name',
+    path: '/apps/bdpan/games/2026-09/formal/share-name',
+    saved_path: null,
+    is_dir: true,
+  }]);
+  assert.throws(() => interpretListResult({}), /JSON 数组/u);
 });

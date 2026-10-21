@@ -4,7 +4,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { BdpanClient } from './bdpan.js';
 import { buildTransferPlan, validateCatalog } from './planner.js';
-import { loadState, saveState, shouldProcess } from './state.js';
+import { clearStateRecord, loadState, needsLegacyLayoutRepair, saveState, shouldProcess } from './state.js';
 import type { CatalogFile, TransferRecord } from './types.js';
 
 const TOOL_DIR = path.dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
@@ -16,6 +16,8 @@ interface CliOptions {
   bdpanBin: string;
   execute: boolean;
   retryFailed: boolean;
+  repairCompleted: boolean;
+  clearRecord: boolean;
   postId: number | null;
   limit: number | null;
   delayMs: number;
@@ -47,6 +49,8 @@ function parseArgs(input: string[]): CliOptions {
   let bdpanBin = process.env.BDPAN_BIN || 'bdpan';
   let execute = false;
   let retryFailed = false;
+  let repairCompleted = false;
+  let clearRecord = false;
   let postId: number | null = null;
   let limit: number | null = null;
   let delayMs = 3000;
@@ -62,6 +66,8 @@ function parseArgs(input: string[]): CliOptions {
     else if (argument === '--delay') delayMs = nonNegativeInteger(readValue(args, index++, argument), argument);
     else if (argument === '--execute') execute = true;
     else if (argument === '--retry-failed') retryFailed = true;
+    else if (argument === '--repair-completed') repairCompleted = true;
+    else if (argument === '--clear-record') clearRecord = true;
     else if (argument === '--help' || argument === '-h') {
       printHelp();
       process.exit(0);
@@ -69,6 +75,9 @@ function parseArgs(input: string[]): CliOptions {
   }
 
   if (!catalogPath) throw new Error('必须提供 --catalog <月度JSON>');
+  if (repairCompleted && postId === null) throw new Error('--repair-completed 必须与 --post-id ID 一起使用');
+  if (clearRecord && postId === null) throw new Error('--clear-record 必须与 --post-id ID 一起使用');
+  if (clearRecord && repairCompleted) throw new Error('--clear-record 不能与 --repair-completed 同时使用');
   return {
     catalogPath: path.resolve(catalogPath),
     stateDir: path.resolve(stateDir),
@@ -76,6 +85,8 @@ function parseArgs(input: string[]): CliOptions {
     bdpanBin,
     execute,
     retryFailed,
+    repairCompleted,
+    clearRecord,
     postId,
     limit,
     delayMs,
@@ -86,8 +97,8 @@ function printHelp(): void {
   console.log(`game-transfer：将 game-catalog 中的百度分享转存到自己的网盘
 
 用法：
-  pnpm start -- --catalog ../game-catalog/data/acgyyg/2026-10.json
-  pnpm start -- --catalog catalog.json --limit 1 --execute
+  npm start -- --catalog ../game-catalog/data/acgyyg/2026-10.json
+  npm start -- --catalog catalog.json --limit 1 --execute
 
 参数：
   --catalog FILE       game-catalog 生成的月度 JSON（必填）
@@ -98,7 +109,9 @@ function printHelp(): void {
   --limit N            最多选择 N 个待处理游戏
   --delay MS           两次转存之间的等待，默认 3000ms
   --retry-failed       重试状态为 failed 的项目
-  --execute            实际写入网盘；不提供时仅预览计划
+  --repair-completed   修复指定旧版 completed 记录的双层目录（必须搭配 --post-id）
+  --clear-record       清除指定文章的本地转存记录（必须搭配 --post-id）
+  --execute            实际执行转存、修复或清除；不提供时仅预览
 `);
 }
 
@@ -129,6 +142,7 @@ function newRecord(item: ReturnType<typeof buildTransferPlan>[number], attempts:
     saved_paths: [],
     transferred_items: [],
     final_path: null,
+    repair_source_path: null,
     attempts,
     last_error: null,
     updated_at: new Date().toISOString(),
@@ -140,29 +154,81 @@ async function main(): Promise<void> {
   const options = parseArgs(process.argv.slice(2));
   const catalog = JSON.parse(await fs.readFile(options.catalogPath, 'utf8')) as unknown;
   validateCatalog(catalog);
+  const statePath = path.join(options.stateDir, `${catalog.source.month}.json`);
+  const state = await loadState(statePath, options.catalogPath, catalog.source.month);
+
+  if (options.clearRecord) {
+    const game = (catalog as CatalogFile).games.find((item) => item.id === options.postId);
+    if (!game) throw new Error(`月度目录中找不到文章 ID：${String(options.postId)}`);
+    const existing = state.records[String(options.postId)];
+    console.log(`📚 月份：${catalog.source.month}`);
+    console.log(`🎮 游戏：[${game.id}] ${game.parsed_name || game.raw_title || game.safe_name}`);
+    console.log(`🧭 模式：${options.execute ? '实际清除本地转存记录' : '仅预览清除操作（不会修改状态文件）'}`);
+    console.log(`状态文件：${statePath}`);
+    if (!existing) {
+      console.log('✓ 该文章没有转存记录，无需清除。');
+      return;
+    }
+    console.log(`当前状态：${existing.status}（更新于 ${existing.updated_at}）`);
+    if (!options.execute) {
+      console.log('\n未提供 --execute，记录尚未清除。');
+      return;
+    }
+    clearStateRecord(state, game.id);
+    await saveState(statePath, state);
+    console.log('\n✓ 本地转存记录已清除。');
+    console.log('⚠️ 百度网盘中的已有文件没有删除；再次转存前请确认并处理已有目标目录，避免重复或名称冲突。');
+    return;
+  }
+
   let plan = buildTransferPlan(catalog as CatalogFile, options.targetRoot);
   if (options.postId !== null) plan = plan.filter((item) => item.post_id === options.postId);
-  if (options.limit !== null) plan = plan.slice(0, options.limit);
   if (plan.length === 0) throw new Error('没有符合条件的百度分享链接');
+
+  if (options.repairCompleted) {
+    const item = plan[0];
+    const existing = item ? state.records[String(item.post_id)] : undefined;
+    if (!item || !existing || existing.status !== 'completed' || existing.share_fingerprint !== item.share_fingerprint) {
+      throw new Error('指定项目没有与当前分享相符的 completed 状态，不能执行旧目录修复');
+    }
+    if (!needsLegacyLayoutRepair(existing, item)) {
+      throw new Error('指定项目已经是新版单层目录，无需修复');
+    }
+  } else if (options.postId === null) {
+    // --limit 表示“最多处理 N 个待处理项目”，而不是目录 JSON 的前 N 项。
+    plan = plan.filter((item) => shouldProcess(state.records[String(item.post_id)], item, options.retryFailed).process);
+  }
+  if (options.limit !== null) plan = plan.slice(0, options.limit);
+
+  if (plan.length === 0) {
+    console.log(`📚 月份：${catalog.source.month}`);
+    console.log('✓ 没有待处理的百度分享');
+    console.log(`状态文件：${statePath}`);
+    return;
+  }
 
   console.log(`📚 月份：${catalog.source.month}`);
   console.log(`🎮 选择：${plan.length} 个游戏`);
-  console.log(`🧭 模式：${options.execute ? '实际转存' : '仅预览（不会写入网盘）'}`);
+  const mode = options.repairCompleted
+    ? (options.execute ? '实际修复旧双层目录' : '仅预览旧目录修复（不会写入网盘）')
+    : (options.execute ? '实际转存' : '仅预览（不会写入网盘）');
+  console.log(`🧭 模式：${mode}`);
   for (const [index, item] of plan.entries()) {
     console.log(`${index + 1}. [${item.post_id}] ${item.game_name}`);
     console.log(`   目标：我的应用数据/bdpan/${item.target_dir}`);
     console.log(`   提取码：${item.share_code ? '有' : '无'}`);
+    if (options.repairCompleted) console.log('   操作：把唯一内层文件夹的内容上移一层，再删除确认已清空的内层文件夹');
   }
   if (!options.execute) {
     console.log('\n未提供 --execute，计划预览完成。');
     return;
   }
 
-  const statePath = path.join(options.stateDir, `${catalog.source.month}.json`);
-  const state = await loadState(statePath, options.catalogPath, catalog.source.month);
   const client = new BdpanClient(options.bdpanBin);
   await client.assertLoggedIn();
-  console.log('\n✓ bdpan 已登录，开始串行转存');
+  console.log(options.repairCompleted
+    ? '\n✓ bdpan 已登录，开始修复旧目录'
+    : '\n✓ bdpan 已登录，开始串行转存');
 
   let completed = 0;
   let submitted = 0;
@@ -172,6 +238,36 @@ async function main(): Promise<void> {
   for (const [index, item] of plan.entries()) {
     const key = String(item.post_id);
     const existing = state.records[key];
+    if (options.repairCompleted) {
+      const record = existing as TransferRecord;
+      console.log(`[${index + 1}/${plan.length}] 修复 ${item.game_name}`);
+      try {
+        if (!record.repair_source_path) {
+          record.repair_source_path = await client.findLegacyNestedDirectory(item);
+          record.updated_at = new Date().toISOString();
+          state.records[key] = record;
+          await saveState(statePath, state);
+        }
+        record.saved_paths = await client.repairLegacyNestedDirectory(item, record.repair_source_path);
+        record.final_path = `/apps/bdpan/${item.target_dir}`;
+        record.layout_version = 2;
+        record.repair_source_path = null;
+        record.last_error = null;
+        record.updated_at = new Date().toISOString();
+        state.records[key] = record;
+        await saveState(statePath, state);
+        completed += 1;
+        console.log('  ✓ 旧双层目录已整理为单层正式游戏目录');
+      } catch (error) {
+        record.last_error = error instanceof Error ? error.message : String(error);
+        record.updated_at = new Date().toISOString();
+        state.records[key] = record;
+        await saveState(statePath, state);
+        failed += 1;
+        console.error(`  ✗ ${record.last_error}`);
+      }
+      continue;
+    }
     const decision = shouldProcess(existing, item, options.retryFailed);
     if (!decision.process) {
       skipped += 1;
@@ -203,6 +299,7 @@ async function main(): Promise<void> {
         record.status = 'completed';
         record.saved_paths = finalPaths;
         record.final_path = `/apps/bdpan/${item.target_dir}`;
+        record.layout_version = 2;
         record.last_error = null;
         completed += 1;
         console.log('  ✓ 转存并整理为单层正式游戏目录');
