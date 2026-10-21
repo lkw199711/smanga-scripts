@@ -36,7 +36,7 @@ export interface GameRecord {
   parsed_name: string;
   safe_name: string;
   name_override: string | null;
-  name_confidence: 'source-title';
+  name_confidence: 'source-title' | 'heuristic';
   description: GameDescription;
   shares: ShareRecord[];
   extract_password: string | null;

@@ -1,7 +1,7 @@
 import { load, type Cheerio, type CheerioAPI } from 'cheerio';
 import type { AnyNode, Element } from 'domhandler';
 import type { DescriptionImage, GameRecord, ShareRecord, WordPressPost } from './types.js';
-import { parseGameName, toSafeName } from './name.js';
+import { extractFormalGameName, parseGameName, toSafeName } from './name.js';
 
 interface ProviderInfo {
   provider: string;
@@ -210,6 +210,7 @@ export function parseArticle(post: WordPressPost, articleHtml: string): GameReco
   const descriptionHtml = description.html()?.trim() ?? '';
   const descriptionText = normalizeDescriptionText(description.text());
   const rawTitle = parseGameName(post.title.rendered);
+  const parsedName = extractFormalGameName(rawTitle);
   const warnings: string[] = [];
   if (shares.length === 0) warnings.push('未发现分享链接');
   if (!descriptionText) warnings.push('游戏简介为空');
@@ -222,10 +223,10 @@ export function parseArticle(post: WordPressPost, articleHtml: string): GameReco
     source_url: post.link,
     slug: post.slug,
     raw_title: rawTitle,
-    parsed_name: rawTitle,
-    safe_name: toSafeName(rawTitle),
+    parsed_name: parsedName,
+    safe_name: toSafeName(parsedName),
     name_override: null,
-    name_confidence: 'source-title',
+    name_confidence: parsedName === rawTitle ? 'source-title' : 'heuristic',
     description: { text: descriptionText, html: descriptionHtml, images },
     shares,
     extract_password: extractPassword,

@@ -10,7 +10,7 @@ const post: WordPressPost = {
   modified: '2026-10-21T12:30:00',
   slug: 'sample-game',
   link: 'https://acgyyg.cc/sample-game/',
-  title: { rendered: '正式游戏名: A/B?' },
+  title: { rendered: '【RPG/中文】正式游戏名: A/B? V1.2 官方中文版【新作/1G】' },
 };
 
 test('extracts description, images, every share provider and archive password', () => {
@@ -28,8 +28,10 @@ test('extracts description, images, every share provider and archive password', 
     </div>`;
 
   const game = parseArticle(post, html);
-  assert.equal(game.raw_title, '正式游戏名: A/B?');
+  assert.equal(game.raw_title, '【RPG/中文】正式游戏名: A/B? V1.2 官方中文版【新作/1G】');
+  assert.equal(game.parsed_name, '正式游戏名: A/B?');
   assert.equal(game.safe_name, '正式游戏名： A／B？');
+  assert.equal(game.name_confidence, 'heuristic');
   assert.equal(game.published_at, '2026-10-21T12:00:00+08:00');
   assert.deepEqual(game.shares.map((share) => share.provider), ['baidu', 'xunlei', 'weiyun', 'unknown']);
   assert.deepEqual(game.shares.map((share) => share.code), ['b123', null, 'w456', 'n789']);

@@ -30,6 +30,31 @@ export function parseGameName(rawTitle: string): string {
     .trim();
 }
 
+export function extractFormalGameName(rawTitle: string): string {
+  const sourceTitle = parseGameName(rawTitle);
+  let candidate = sourceTitle
+    .replace(/^(?:【[^】]+】\s*)+/gu, '')
+    .replace(/(?:\s*【[^】]+】)+$/gu, '')
+    .trim();
+
+  const releaseMarkers = [
+    /[Vv]\d+(?:[._-]\d+)*(?:[a-z])?(?=\s|$)/iu,
+    /(?:STEAM\s*)?(?:官方(?:中文|汉化)|AI\s*汉化|汉化版)/iu,
+  ];
+  const markerIndexes = releaseMarkers
+    .map((pattern) => candidate.search(pattern))
+    .filter((index) => index >= 0);
+  if (markerIndexes.length > 0) {
+    candidate = candidate.slice(0, Math.min(...markerIndexes));
+  }
+
+  candidate = candidate
+    .replace(/[\s+\-—–_:：·]+$/gu, '')
+    .replace(/\s+/gu, ' ')
+    .trim();
+  return candidate || sourceTitle;
+}
+
 export function toSafeName(name: string, maxLength = 120): string {
   let safe = name
     .normalize('NFC')
