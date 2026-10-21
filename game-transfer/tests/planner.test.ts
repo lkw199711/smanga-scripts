@@ -22,6 +22,7 @@ const catalog: CatalogFile = {
 test('builds a Baidu-only transfer plan without exposing credentials in the target path', () => {
   const plan = buildTransferPlan(catalog, 'games');
   assert.equal(plan.length, 1);
+  assert.equal(plan[0]?.transfer_dir, 'games/2026-10');
   assert.equal(plan[0]?.target_dir, 'games/2026-10/正式游戏名：特别版');
   assert.equal(plan[0]?.share_code, 'a1b2');
   assert.match(plan[0]?.share_fingerprint ?? '', /^[a-f0-9]{64}$/u);

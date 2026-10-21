@@ -6,18 +6,26 @@ import type { TransferPlanItem } from '../src/types.js';
 test('interprets completed transfer output', () => {
   const result = interpretTransferResult({
     saved_path: '我的应用数据/bdpan/games/demo',
-    files: [{ saved_path: '我的应用数据/bdpan/games/demo/file.zip' }],
+    files: [{
+      name: 'share-name',
+      path: '/apps/bdpan/games/share-name',
+      saved_path: '我的应用数据/bdpan/games/share-name',
+      is_dir: true,
+    }],
   });
   assert.equal(result.status, 'completed');
-  assert.deepEqual(result.savedPaths, [
-    '我的应用数据/bdpan/games/demo',
-    '我的应用数据/bdpan/games/demo/file.zip',
-  ]);
+  assert.deepEqual(result.savedPaths, ['我的应用数据/bdpan/games/share-name']);
+  assert.deepEqual(result.items, [{
+    name: 'share-name',
+    path: '/apps/bdpan/games/share-name',
+    saved_path: '我的应用数据/bdpan/games/share-name',
+    is_dir: true,
+  }]);
 });
 
 test('interprets submitted asynchronous output without claiming completion', () => {
   const result = interpretTransferResult({ status: 'submitted', task_id: '123456' });
-  assert.deepEqual(result, { status: 'submitted', taskId: '123456', savedPaths: [] });
+  assert.deepEqual(result, { status: 'submitted', taskId: '123456', savedPaths: [], items: [] });
 });
 
 test('treats non-zero errno as an error', () => {
@@ -35,6 +43,7 @@ test('redacts the URL and extraction code from errors', () => {
     post_id: 1,
     game_name: 'demo',
     source_url: 'https://acgyyg.cc/demo',
+    transfer_dir: 'games/2026-10',
     target_dir: 'games/demo',
     share_url: 'https://pan.baidu.com/s/private',
     share_code: 'a1b2',

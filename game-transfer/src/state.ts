@@ -39,6 +39,7 @@ export function shouldProcess(
   if (!existing || existing.share_fingerprint !== item.share_fingerprint) return { process: true, reason: null };
   if (existing.status === 'completed') return { process: false, reason: '已经完成' };
   if (existing.status === 'submitted') return { process: false, reason: '任务已提交，禁止重复提交' };
+  if (existing.status === 'transferred') return { process: true, reason: '转存已完成，继续整理目录' };
   if (existing.status === 'failed' && !retryFailed) return { process: false, reason: '上次失败；使用 --retry-failed 才会重试' };
   return { process: true, reason: null };
 }

@@ -33,11 +33,13 @@ export function buildTransferPlan(catalog: CatalogFile, targetRoot: string): Tra
     const share = game.shares.find((candidate) => candidate.provider === 'baidu' && candidate.url);
     if (!share) return [];
 
-    const targetDir = normalizeRemotePath(path.posix.join(root, catalog.source.month, game.safe_name));
+    const transferDir = normalizeRemotePath(path.posix.join(root, catalog.source.month));
+    const targetDir = normalizeRemotePath(path.posix.join(transferDir, game.safe_name));
     return [{
       post_id: game.id,
       game_name: game.parsed_name || game.raw_title || game.safe_name,
       source_url: game.source_url,
+      transfer_dir: transferDir,
       target_dir: targetDir,
       share_url: share.url,
       share_code: share.code,

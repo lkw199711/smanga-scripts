@@ -122,10 +122,13 @@ function newRecord(item: ReturnType<typeof buildTransferPlan>[number], attempts:
     game_name: item.game_name,
     provider: 'baidu',
     share_fingerprint: item.share_fingerprint,
+    transfer_dir: item.transfer_dir,
     target_dir: item.target_dir,
     status: 'failed',
     task_id: null,
     saved_paths: [],
+    transferred_items: [],
+    final_path: null,
     attempts,
     last_error: null,
     updated_at: new Date().toISOString(),
@@ -176,22 +179,36 @@ async function main(): Promise<void> {
       continue;
     }
 
-    const record = newRecord(item, (existing?.attempts ?? 0) + 1);
-    console.log(`[${index + 1}/${plan.length}] 转存 ${item.game_name}`);
+    const resumeNormalization = existing?.status === 'transferred'
+      && existing.share_fingerprint === item.share_fingerprint;
+    const record = resumeNormalization ? existing : newRecord(item, (existing?.attempts ?? 0) + 1);
+    console.log(`[${index + 1}/${plan.length}] ${resumeNormalization ? '继续整理' : '转存'} ${item.game_name}`);
     try {
-      const result = await client.transfer(item);
-      record.status = result.status;
-      record.task_id = result.taskId;
-      record.saved_paths = result.savedPaths;
-      if (result.status === 'completed') {
-        completed += 1;
-        console.log('  ✓ 已完成');
-      } else {
+      if (!resumeNormalization) {
+        const result = await client.transfer(item);
+        record.status = result.status === 'completed' ? 'transferred' : 'submitted';
+        record.task_id = result.taskId;
+        record.saved_paths = result.savedPaths;
+        record.transferred_items = result.items;
+        record.updated_at = new Date().toISOString();
+        state.records[key] = record;
+        await saveState(statePath, state);
+      }
+
+      if (record.status === 'submitted') {
         submitted += 1;
-        console.log(`  ⏳ 已提交异步任务${result.taskId ? `（任务 ID 已保存）` : ''}`);
+        console.log(`  ⏳ 已提交异步任务${record.task_id ? '（任务 ID 已保存）' : ''}`);
+      } else {
+        const finalPaths = await client.normalizeTransferredItems(item, record.transferred_items ?? []);
+        record.status = 'completed';
+        record.saved_paths = finalPaths;
+        record.final_path = `/apps/bdpan/${item.target_dir}`;
+        record.last_error = null;
+        completed += 1;
+        console.log('  ✓ 转存并整理为单层正式游戏目录');
       }
     } catch (error) {
-      record.status = 'failed';
+      if (record.status !== 'transferred') record.status = 'failed';
       record.last_error = error instanceof Error ? error.message : String(error);
       failed += 1;
       console.error(`  ✗ ${record.last_error}`);
