@@ -13,26 +13,8 @@ proxy-providers:
       url: https://www.gstatic.com/generate_204
       interval: 300
     proxy: 直连
-  套路云:
-    url: "http://51.254.174.163/api/v1/client/subscribe?token=4cf301139b7c5916c46a8b0183d48174"
-    type: http
-    interval: 86400
-    health-check:
-      enable: true
-      url: https://www.gstatic.com/generate_204
-      interval: 300
-    proxy: 直连
-  奶云:
-    url: "https://212.47.238.39/api/v1/client/subscribe?token=4e1949e60aa4204c1c438ce2c2366739"
-    type: http
-    interval: 86400
-    health-check:
-      enable: true
-      url: https://www.gstatic.com/generate_204
-      interval: 300
-    proxy: 直连
-  蜜雪冰城:
-    url: "https://5201314.kad520.uk/api/kad520s/7d4a0b4fd145f3a28f3805c35f03889a"
+  狗子云:
+    url: "https://pwac.gzi8998-ddns0721.eu/api/v1/gzcloud/subscribe?token=0be9c0aacf47bb831c3779d3df4aa552"
     type: http
     interval: 86400
     health-check:
