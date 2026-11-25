@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  nginx-ui:
+    image: uozi/nginx-ui:latest
+    container_name: nginx-ui
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./nginx:/etc/nginx
+      - ./nginx-ui:/etc/nginx-ui
+      - /var/www:/var/www
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "880:80"
+      - "843:443"
+    stdin_open: true
+    tty: true
