@@ -1,0 +1,25 @@
+services:
+  speedtest:
+    image: registry.cn-hangzhou.aliyuncs.com/lkw199711/smanga-nodejs:4.3.35
+    #image: lkw199711/smanga-nodejs:4.3.04
+    container_name: smanga
+    ports:
+      - "9797:9797"
+      - "9798:9798"
+    restart: always
+    networks:
+      - smanga-network
+    volumes:
+      - ./data:/data
+      - /vol1:/vol1	#自己有几个硬盘,或者说存储池,就要映射多少目录,保持docker内外路径一致.
+      - /vol2:/vol2 #我这里是接了三个硬盘
+      - /vol3:/vol3
+      - /vol02:/vol02
+    environment:
+      PUID: 0    # 想切换为哪个用户来运行程序，不希望用root,可以根据自己的机器权限调整
+      PGID: 0	 
+      TZ: Asia/Shanghai
+
+networks:
+  smanga-network:
+    driver: bridge
